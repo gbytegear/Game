@@ -9,8 +9,8 @@ customElements.define('game-controller',
             if (window.gameController) return this.remove();
             window.gameController = this;
 
-            this.ui = document.createElement('game-ui');
-            this.appendChild(this.ui);
+            // this.ui = document.createElement('game-ui');
+            // this.appendChild(this.ui);
 
             this.startKeyEventLoop();
         }
