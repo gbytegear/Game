@@ -4,3 +4,4 @@ include('./src/js/userInterface.js');
 include('./src/js/objects.js');
 include('./src/js/engine.js');
 
+include('./src/js/data/default.js');
