@@ -6,24 +6,11 @@ customElements.define('gm-area',
             super();
 
             this.chunks = new Object;
-            this.chunkSize = 1000;
-
-            this.shift = { left: document.body.offsetWidth / 2, top: document.body.offsetHeight / 2 };
+            this.chunkSize = 500;
 
             this.map = JSON.parse(localStorage.getItem('map'));
 
             this.currentChunk = Math.floor(gameController.playerPosition.x / this.chunkSize) + "x" + Math.floor(gameController.playerPosition.y / this.chunkSize);
-        }
-
-        move(x, y) {
-            this.style.left = -x + "px";
-            this.style.top = -y + "px";
-            let calculatedChunk = Math.floor(gameController.playerPosition.x / this.chunkSize) + "x" + Math.floor(gameController.playerPosition.y / this.chunkSize)
-            if (this.currentChunk != calculatedChunk) {
-                this.currentChunk = calculatedChunk;
-                this.loadCurrentChunk();
-                console.log(this.currentChunk);
-            }
         }
 
         connectedCallback() {
@@ -41,6 +28,25 @@ customElements.define('gm-area',
             this.style.marginTop = document.body.offsetHeight / 2 + "px";
 
             this.loadCurrentChunk();
+        }
+
+        getChunkByCoordinats(coordinats){
+            return this.chunks[coordinats]
+        }
+
+        getCurrentChunk(){
+            return this.getChunkByCoordinats(this.currentChunk);
+        }
+
+        move(x, y) {
+            this.style.left = -x + "px";
+            this.style.top = -y + "px";
+            let calculatedChunk = Math.floor(gameController.playerPosition.x / this.chunkSize) + "x" + Math.floor(gameController.playerPosition.y / this.chunkSize)
+            if (this.currentChunk != calculatedChunk) {
+                this.currentChunk = calculatedChunk;
+                this.loadCurrentChunk();
+                console.log(this.currentChunk);
+            }
         }
 
         loadCurrentChunk() {
@@ -89,7 +95,7 @@ customElements.define('gm-area-chunk', class Chunk extends HTMLElement {
 
             if (properties.objects) {
                 properties.objects.forEach(objectInfo => {
-                    let object = document.createElement(`gm-chunk-${objectInfo.type}object`);
+                    let object = document.createElement(`gm-${objectInfo.type}-object`);
                     object.init(objectInfo);
                     this.appendChild(object);
                 });
@@ -134,8 +140,31 @@ customElements.define('gm-chunk-tile', class Tile extends HTMLElement {
 
 
 
+// --------------------------------------------------------------------------- АБСТРАКТНЫЙ КЛАСС ОБЪЕКТОВ
+class GMObject extends HTMLElement {
+    constructor() {
+        super();
+
+        Object.defineProperties(this, {
+            x: {
+                get: () => (this.style.position == "absolute") ? Number(this.style.left.match(/\d+/)[0]) : Number(this.style.marginLeft.match(/\d+/)[0]),
+                set: x => (this.style.position == "absolute") ? this.style.left = x + "px" : this.style.marginLeft = x + "px",
+            },
+            y: {
+                get: () => (this.style.position == "absolute") ? Number(this.style.top.match(/\d+/)[0]) : Number(this.style.marginTop.match(/\d+/)[0]),
+                set: y => (this.style.position == "absolute") ? this.style.top = y + "px" : this.style.marginTop = y + "px",
+            }
+        });
+    }
+}
+
+
+
+
+
+
 // --------------------------------------------------------------------------- ТЕКСТУРИРОВАННЫЙ ОБЪЕКТ
-customElements.define('gm-chunk-texturedobject', class Tile extends HTMLElement {
+customElements.define('gm-textured-object', class Tile extends GMObject {
     constructor() {
         super();
 
@@ -143,8 +172,8 @@ customElements.define('gm-chunk-texturedobject', class Tile extends HTMLElement 
             this.style.display = "block";
 
             this.style.position = "absolute";
-            this.style.left = `${properties.position.x}px`;
-            this.style.top = `${properties.position.y}px`;
+            this.x = properties.position.x;
+            this.y = properties.position.y;
 
             this.style.backgroundImage = `url(${properties.texture})`;
             this.style.backgroundSize = `100% 100%`;
@@ -160,9 +189,54 @@ customElements.define('gm-chunk-texturedobject', class Tile extends HTMLElement 
 
 
 
+// --------------------------------------------------------------------------- СКЕЛЕТНЫЙ ОБЪЕКТ
+customElements.define('gm-skeleton-object', class Skeleton extends GMObject {
+    constructor() {
+        super();
+        this.boneTree = new Object;
+
+        this.init = (properties) => {
+            this.style.display = "block";
+
+            this.style.position = "absolute";
+            this.x = `${properties.position.x}px`;
+            this.y = `${properties.position.y}px`;
+        };
+    }
+
+    addBone(boneTree) {
+
+    }
+});
+
+//Кость
+customElements.define('gm-skeleton-bone', class Bone extends HTMLElement {
+    constructor() {
+        super();
+        this.skeleton = null;
+    }
+
+    init(skeleton, width, height, texture, originX, originY) {
+        this.skeleton = skeleton;
+
+        this.style.width = width + "px";
+        this.style.height = height + "px";
+
+        this.style.backgroundImage = `url(${texture})`;
+        this.style.backgroundSize = `100% 100%`;
+        this.style.backgroundRepeat = "norepeat";
+
+        this.style.position = "absolute";
+    }
+});
+
+
+
+
+
 
 // --------------------------------------------------------------------------- ТРЁХМЕРНЫЙ КУБ
-customElements.define('gm-cube', class Cube extends HTMLElement {
+customElements.define('gm-cube-object', class Cube extends GMObject {
     constructor() {
         super();
 
@@ -192,7 +266,7 @@ customElements.define('gm-cube', class Cube extends HTMLElement {
 
         Object.defineProperties(this, {
             width: {
-                get: () => width,
+                get: () => Number(this.front.style.width.match(/\d+/)[0]),
                 set: width => {
                     this.style.width = width + "px";
                     this.front.style.width = width + "px";
@@ -223,23 +297,23 @@ customElements.define('gm-cube', class Cube extends HTMLElement {
             textures: {
                 get: () => textureList,
                 set: textures => {
-                    this.front.style.background = textures.front;
-                    this.back.style.background = textures.back;
-                    this.left.style.background = textures.left;
-                    this.right.style.background = textures.right;
-                    this.top.style.background = textures.top;
-                    this.bottom.style.background = textures.bottom;
+                    this.front.style.background = `url(${textures.front})`;
+                    this.back.style.background = `url(${textures.back})`;
+                    this.left.style.background = `url(${textures.left})`;
+                    this.right.style.background = `url(${textures.right})`;
+                    this.top.style.background = `url(${textures.top})`;
+                    this.bottom.style.background = `url(${textures.bottom})`;
                     textureList = textures;
                 }
             },
             texture: {
                 set: texture => {
-                    this.front.style.background = texture;
-                    this.back.style.background = texture;
-                    this.left.style.background = texture;
-                    this.right.style.background = texture;
-                    this.top.style.background = texture;
-                    this.bottom.style.background = texture;
+                    this.front.style.backgroundImage = `url(${texture})`;
+                    this.back.style.backgroundImage = `url(${texture})`;
+                    this.left.style.backgroundImage = `url(${texture})`;
+                    this.right.style.backgroundImage = `url(${texture})`;
+                    this.top.style.backgroundImage = `url(${texture})`;
+                    this.bottom.style.backgroundImage = `url(${texture})`;
                     textureList = {
                         front: texture,
                         back: texture,
@@ -251,17 +325,30 @@ customElements.define('gm-cube', class Cube extends HTMLElement {
                 }
             }
         });
+
+        this.init = (properties) => {
+            this.style.display = "block";
+            this.width = properties.size.width;
+            this.height = properties.size.height;
+            this.depth = properties.size.depth;
+
+            this.style.position = "absolute";
+            this.x = properties.position.x;
+            this.y = properties.position.y;
+
+            this.texture = properties.texture;
+        };
     }
 
     connectedCallback() {
         this.style.display = "block";
         this.style.position = "absolute";
 
-        if (this.getAttribute('width')) this.width = this.getAttribute('width');
-        if (this.getAttribute('height')) this.height = this.getAttribute('height');
-        if (this.getAttribute('depth')) this.depth = this.getAttribute('depth');
-        if (this.getAttribute('textures')) this.textures = JSON.parse(this.getAttribute('textures'));
-        if (this.getAttribute('texture')) this.texture = this.getAttribute('texture');
+        // if (this.getAttribute('width')) this.width = this.getAttribute('width');
+        // if (this.getAttribute('height')) this.height = this.getAttribute('height');
+        // if (this.getAttribute('depth')) this.depth = this.getAttribute('depth');
+        // if (this.getAttribute('textures')) this.textures = JSON.parse(this.getAttribute('textures'));
+        // if (this.getAttribute('texture')) this.texture = this.getAttribute('texture');
 
         this.appendChild(this.back);
         this.appendChild(this.bottom);
@@ -269,11 +356,19 @@ customElements.define('gm-cube', class Cube extends HTMLElement {
         this.appendChild(this.right);
         this.appendChild(this.top);
         this.appendChild(this.front);
-
-        this.setPosition(50, 50);
     }
 
     changePerspective(x, y) {
+        x = (x > this.width / 2) ?
+            x - this.width / 2
+            : (x < -this.width / 2) ?
+                x + this.width / 2 : 0;
+        y = (y > this.height / 2) ?
+            y - this.height / 2
+            : (y < -this.height / 2) ?
+                y + this.height / 2
+                : 0;
+
         this.front.style.transform = `translate(${x}px, ${y}px)`;
 
         if (x > 0) {

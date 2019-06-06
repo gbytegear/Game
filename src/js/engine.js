@@ -6,6 +6,7 @@ customElements.define('game-controller',
         constructor() {
             super();
 
+            this.fps = 0;
             this.playerPosition = { x: 0, y: 0 };
         }
 
@@ -28,7 +29,7 @@ customElements.define('game-controller',
                 if (e.keyCode === 39 /* right */ || e.keyCode === 68 /* d */) right = true;
                 if (e.keyCode === 40 /* down */ || e.keyCode === 83 /* s */) down = true;
                 if (e.keyCode === 37 /* left */ || e.keyCode === 65 /* a */) left = true;
-                if(!loop)loop = setInterval(movementLoop, 1);
+                if (!loop) loop = setInterval(movementLoop, 0);
             }
             document.addEventListener('keyup', release)
             function release(e) {
@@ -36,7 +37,7 @@ customElements.define('game-controller',
                 if (e.keyCode === 39 /* right */ || e.keyCode === 68 /* d */) right = false;
                 if (e.keyCode === 40 /* down */ || e.keyCode === 83 /* s */) down = false;
                 if (e.keyCode === 37 /* left */ || e.keyCode === 65 /* a */) left = false;
-                if(!(up || right || down || left)){
+                if (!(up || right || down || left)) {
                     clearInterval(loop);
                     loop = undefined;
                 }
@@ -54,14 +55,29 @@ customElements.define('game-controller',
     , { extends: 'body' });
 
 
-// customElements.define("fps-viewer", class FpsView{
-//     constructor(){
-//         super();
-//         var lastLoop = new Date();
-//         function gameLoop() { 
-//             var thisLoop = new Date();
-//             var fps = 1000 / (thisLoop - lastLoop);
-//             lastLoop = thisLoop;
-//         }
-//     }
-// })
+customElements.define("fps-viewer", class FpsView extends HTMLElement {
+    connectedCallback() {
+        gameController.fpsViewer = this;
+
+        this.fps = 0;
+        this.minFPS = 10000;
+        this.maxFPS = 0;
+        this.style.zIndex = "999";
+        this.style.position = "absolute";
+
+        setInterval(() => {
+            this.minFPS = 10000;
+            this.maxFPS = 0;
+            this.updateFps(this.fps);
+        }, 10000)
+    }
+
+    updateFps(fps) {
+        if (fps < this.minFPS) this.minFPS = fps;
+        if (fps > this.maxFPS) this.maxFPS = fps;
+        this.fps = fps;
+        this.innerText = `Current FPS: ${this.fps};
+        Minimal FPS: ${this.minFPS};
+        Maximal FPS: ${this.maxFPS};`
+    }
+});
