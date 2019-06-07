@@ -4,17 +4,8 @@ body{
     width: 100vw;
     height: 100vh;
     background-color: #7d7d7d;
-    background-image: radial-gradient(ellipse at center, #fffdff 3%,#6998b2 28%,#6964aa 44%,#473f6b 76%,#252642 100%);
+    /* background-image: radial-gradient(ellipse at center, #fffdff 3%,#6998b2 28%,#6964aa 44%,#473f6b 76%,#252642 100%);
     background-size: 100% auto;
-    background-position: center 100%;
+    background-position: center 100%; */
     margin: 0;
-}
-
-game-ui{
-    width: 100vw;
-    height: 100vh;
-    display: contents;
-    position: fixed;
-    top: 0;
-    left: 0;
 }
