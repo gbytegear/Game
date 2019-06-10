@@ -1,8 +1,8 @@
 
-customElements.define('game-controller', class MainController extends HTMLBodyElement {
+customElements.define('main-controller', class MainController extends HTMLBodyElement {
     constructor() {
         super();
-        window.gameController = this;
+        window.mainController = this;
     }
 }, { extends: "body" });
 
@@ -16,10 +16,10 @@ customElements.define('game-controller', class MainController extends HTMLBodyEl
 
 
 
+// ---------------------------------------------------------------------------------- Canvas JSON Object Model
 
 
-
-class CanvasObjectModel extends Array { //Canvas JSON Object Model
+class CanvasObjectModel extends Array {
     constructor(canvas) {
         super();
         this.canvas = canvas;
@@ -48,14 +48,23 @@ class CanvasObjectModel extends Array { //Canvas JSON Object Model
     }
 };
 
-
-
 CanvasObjectModel.prototype.typeList = new Object;
 
 
 
 
-customElements.define('game-area', class extends HTMLCanvasElement {
+
+
+
+
+
+
+
+
+// ---------------------------------------------------------------------------------- Canvas
+
+
+customElements.define('com-canvas', class extends HTMLCanvasElement {
     constructor() {
         super();
 
@@ -80,18 +89,23 @@ customElements.define('game-area', class extends HTMLCanvasElement {
     }
 
     connectedCallback() {
-        if (gameController.canvas) return this.remove();
-        gameController.canvas = this;
+        if (mainController.canvas) return this.remove();
+        mainController.canvas = this;
     }
 
     rerender() {
+        this.context.resetTransform();
         this.context.clearRect(0, 0, this.width, this.height);
         this.context.beginPath();
         this.render();
     }
 
     render() {
-        this.ObjectModel.forEach(element => element.draw(this.context));
+        this.ObjectModel.forEach(element => {
+            this.context.resetTransform();
+            element.render(this.context)
+        });
+        this.context.closePath();
     }
 
     removeChild(element) {
@@ -102,11 +116,28 @@ customElements.define('game-area', class extends HTMLCanvasElement {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// ---------------------------------------------------------------------------------- Item of COM Elements
+
 /*  Item-element
     visible = true - draw all;
     visible = false - hide all;
-    visible = only - draw only this element;
-    visible = content - draw only content elements;
+    visible = only_this - draw only this element;
+    visible = only_content - draw only content elements;
 */
 
 class COMElement {
@@ -131,6 +162,14 @@ class COMElement {
             y: {
                 set: newY => { y = newY; if (this.parent) this.rerender() },
                 get: () => y
+            },
+            position:{
+                get: () => [x,y],
+                set: position => {
+                    x = position[0];
+                    y = position[1];
+                    this.rerender();
+                }
             },
             visible: {
                 get: () => visible,
@@ -162,11 +201,12 @@ class COMElement {
         // element.index = this.children.length;
         this.children.push(element);
         element.changeParent(this);
-        this.parent.rerender();
+        if(this.parent)this.parent.rerender();
     }
 
     render(ctx) {
-        ctx.moveTo(this.x, this.y);
+        ctx.beginPath();
+        ctx.translate(this.x, this.y);
         switch (this.visible) {
             case "true":
                 this.draw(ctx);
@@ -200,12 +240,32 @@ class COMElement {
 }
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// ---------------------------------------------------------------------------------- Rectangle COM Element
+
 class COMRectangleElement extends COMElement {
     constructor(properties) {
         super();
         let width = 0,
         height = 0,
-        color = "#000";
+        color = "transparent";
 
         Object.defineProperties(this,{
             width:{
@@ -219,6 +279,14 @@ class COMRectangleElement extends COMElement {
             color:{
                 get: () => color,
                 set: newColor => {color = newColor; this.rerender();}
+            },
+            size:{
+                get: () => [width,height],
+                set: size => {
+                    width = size[0];
+                    height = size[1];
+                    this.rerender();
+                }
             }
         })
 
@@ -226,69 +294,71 @@ class COMRectangleElement extends COMElement {
     }
 
     draw(ctx){
-        ctx.rect(this.x,this.y,this.width,this.height);
+        ctx.rect(0,0,this.width,this.height);
         ctx.fillStyle = this.color;
         ctx.fill();
     }
 }
 
 
+
+
+
+
+
+// ---------------------------------------------------------------------------------- Image COM Element
+
+class COMImageElement extends COMElement {
+    constructor(properties) {
+        super();
+        let width = 0,
+        height = 0,
+        src = null,
+        texture = new Image();
+
+        Object.defineProperties(this,{
+            width:{
+                get: () => width,
+                set: newWidth => {width = newWidth; this.rerender();}
+            },
+            height:{
+                get: () => height,
+                set: newHeight => {height = newHeight; this.rerender();}
+            },
+            src:{
+                get: () => src,
+                set: newSrc => {
+                    src = newSrc;
+                    texture.src = src;}
+            },
+            size:{
+                get: () => [width,height],
+                set: size => {
+                    width = size[0];
+                    height = size[1];
+                    this.rerender();
+                }
+            },
+            image:{get:()=>texture}
+        })
+
+        texture.onload = ()=>this.rerender();
+
+        this.setProperties(properties);
+    }
+
+    draw(ctx){
+        ctx.drawImage(this.image, 0, 0, this.width, this.height);
+    }
+}
+
+
+
+
+// ---------------------------------------------------------------------------------- Definition of Elements
+
 CanvasObjectModel.defineObjects({
     item: COMElement,
-    rectangle: COMRectangleElement
+    rectangle: COMRectangleElement,
+    image: COMImageElement
 })
-
-
-// // Элементы
-// class Rectangle {
-//     constructor(properties = {}, parent = null){
-//         let width = 0,
-//         height = 0,
-//         x = 0,
-//         y = 0,
-//         color = "#000";
-
-//         this.parent = parent;
-
-//         const child = new Array;
-
-//         Object.defineProperties(this, {
-//             width:{
-//                 get: () => width,
-//                 set: newWidth => {width = newWidth;this.render();}
-//             },
-//             height:{
-//                 get: () => height,
-//                 set: newHeight => {height = newHeight;this.render();}
-//             },
-//             x:{
-//                 get: () => x,
-//                 set: newX => {x = newX;this.render();}
-//             },
-//             y:{
-//                 get: () => y,
-//                 set: newY => {y = newY;this.render();}
-//             },
-//             color:{
-//                 get: () => color,
-//                 set: newColor => {color = newColor;this.render();}
-//             }
-//         })
-//         this.change(properties);
-//     }
-
-//     render(){(this.parent)?this.parent.render():undefined;}
-
-//     darw(ctx){
-//         ctx.beginPath();
-//         ctx.rect(this.x, this.y, this.width, this.height);
-//         ctx.fillStyle = this.color;
-//         ctx.fill();
-//         ctx.closePath()
-//     }
-
-//     change(properties){
-//         for(let prop in properties)
-//             this[prop] = properties[prop];
-//     }
-// }

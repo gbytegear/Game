@@ -5,10 +5,16 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <link rel="stylesheet" href="./src/css/style.css">
-    <script src="./src/js/main.js" defer></script>
     <title>Document</title>
 </head>
-<body is="game-controller">
-    <canvas is="game-area"></canvas>
+<body is="main-controller">
+    <canvas is="com-canvas"></canvas>
+    <script src="./src/js/main.js"></script>
+    <script>
+        let character = CanvasObjectModel.createElement('item', {position:[10,100]});
+        character.insert(CanvasObjectModel.createElement('image', {position:[0,0], size:[210,140], src: "./src/img/textures/characters/gray_cloack/body.png"}));
+        character.insert(CanvasObjectModel.createElement('image', {position:[40,0], size:[120,120], src: "./src/img/textures/characters/gray_cloack/head.png"}))
+        mainController.canvas.insert(character);
+    </script>
 </body>
 </html>
