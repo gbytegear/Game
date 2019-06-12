@@ -1,10 +1,53 @@
+/* //Содержание по классам
+ * MainController / Body
+ * Canvas JSON Object Model (COM)
+ * COM Canavas
+ * COM Item Elements
+ * COM Rectangle Element
+ * COM Image Element
+ * COM Tiled Map Element
+ * Definition of Elements
+ */
 
+/* //TODO
+ * 
+ */
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// ---------------------------------------------------------------------------------- MainController / Body
 customElements.define('main-controller', class MainController extends HTMLBodyElement {
     constructor() {
         super();
         window.mainController = this;
     }
 }, { extends: "body" });
+
+
+
+
+
+
+
+
+
 
 
 
@@ -61,7 +104,15 @@ CanvasObjectModel.prototype.typeList = new Object;
 
 
 
-// ---------------------------------------------------------------------------------- Canvas
+
+
+
+
+
+
+
+
+// ---------------------------------------------------------------------------------- COM Canvas
 
 
 customElements.define('com-canvas', class extends HTMLCanvasElement {
@@ -111,6 +162,12 @@ customElements.define('com-canvas', class extends HTMLCanvasElement {
         this.rerender();
     }
 
+    rerenderChangeStop(callback) {
+        this.renderBlock = true;
+        callback(this);
+        this.renderBlock = false;
+    }
+
     render() {
         this.ObjectModel.forEach(element => {
             this.context.resetTransform();
@@ -142,14 +199,8 @@ customElements.define('com-canvas', class extends HTMLCanvasElement {
 
 
 
-// ---------------------------------------------------------------------------------- Item of COM Elements
 
-/*  Item-element
-    visible = true - draw all;
-    visible = false - hide all;
-    visible = only_this - draw only this element;
-    visible = only_content - draw only content elements;
-*/
+// ---------------------------------------------------------------------------------- COM Item Elements
 
 class COMElement {
     constructor(properties) {
@@ -157,7 +208,9 @@ class COMElement {
             x = 0, y = 0,
             width = 0, height = 0,
             visible = "true",
-            originPoint = { x: 0, y: 0 }, angle = 0;
+            originPoint = { x: 0, y: 0 }, angle = 0,
+            anchors = new Object,
+            renderBlock = false;
 
         this.children = new Array;
 
@@ -168,6 +221,7 @@ class COMElement {
         }
 
         Object.defineProperties(this, {
+            //Position
             x: {
                 set: newX => { x = newX; if (this.parent) this.rerender() },
                 get: () => x
@@ -185,6 +239,7 @@ class COMElement {
                 }
             },
 
+            //Size
             width: {
                 get: () => width,
                 set: newWidth => { width = newWidth; this.rerender(); }
@@ -202,6 +257,7 @@ class COMElement {
                 }
             },
 
+            // Visibility
             visible: {
                 get: () => visible,
                 set: newVisible => {
@@ -212,15 +268,16 @@ class COMElement {
                 }
             },
 
-
+            // Technical
             parent: {
                 get: () => parent
             },
             index: {
                 get: () => index
             },
+            rerenderIsBlocked:{get: () => renderBlock},
 
-
+            // Transform Origin
             originX: {
                 get: () => originPoint.x,
                 set: newOriginX => { originPoint.x = newOriginX; this.rerender(); }
@@ -243,17 +300,52 @@ class COMElement {
                     this.rerender();
                 }
             },
+
+            // Rotate Origin
             angle: {
                 get: () => angle,
                 set: newAngle => { angle = newAngle; this.rerender(); }
+            },
+
+            // Relative processing
+            anchors: {
+                get: () => anchors,
+                set: newAnchors => {anchors = newAnchors; this.rerender(); }
             }
-        })
+        });
+
+        this.relativeProcessing = () => {
+            renderBlock = true;
+            if(anchors.size || parent)switch(anchors.size){
+                case "fill":
+                this.width = parent.width; this.height = parent.height;
+                break; case "fill_width":
+                this.width = parent.width;
+                break; case "fill_height":
+                this.height = parent.height;
+            };
+
+            if(anchors.position || parent)switch(anchors.position){
+                case "left_top":
+                this.x = 0; this.y = 0;
+                break; case "right_top":
+                this.x = parent.width - this.width; this.y = 0;
+                break; case "left_bottom":
+                this.x = 0; this.y = parent.height - this.height;
+                break; case "right_bottom":
+                this.x = parent.width - this.width; this.y = parent.height - this.height;
+                break; case "center":
+                this.x = parent.width / 2 - this.width / 2; this.y = parent.height / 2 - this.height / 2;
+            };
+
+            renderBlock = false;
+        }
 
         this.setProperties(properties);
     }
 
     rerender() {
-        if (this.parent)
+        if (this.parent && !this.rerenderIsBlocked)
             this.parent.rerender();
     }
 
@@ -268,6 +360,7 @@ class COMElement {
         ctx.translate(this.originX, this.originY);
         ctx.rotate(this.angle * Math.PI / 180);
 
+        this.relativeProcessing();
         this.draw(ctx);
 
         ctx.translate(-this.originX, -this.originY);
@@ -326,7 +419,7 @@ class COMElement {
 
 
 
-// ---------------------------------------------------------------------------------- Rectangle COM Element
+// ---------------------------------------------------------------------------------- COM Rectangle Element
 
 class COMRectangleElement extends COMElement {
     constructor(properties) {
@@ -356,7 +449,20 @@ class COMRectangleElement extends COMElement {
 
 
 
-// ---------------------------------------------------------------------------------- Image COM Element
+
+
+
+
+
+
+
+
+
+
+
+
+
+// ---------------------------------------------------------------------------------- COM Image Element
 
 class COMImageElement extends COMElement {
     constructor(properties) {
@@ -389,7 +495,22 @@ class COMImageElement extends COMElement {
 
 
 
-// ---------------------------------------------------------------------------------- Tiled Map COM Element
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// ---------------------------------------------------------------------------------- COM Tiled Map Element
 
 class COMTiledMapElement extends COMElement {
     constructor(properties) {
@@ -447,6 +568,23 @@ class COMTiledMapElement extends COMElement {
                 ctx.drawImage(this.image, this.tileWidth * ix, this.tileHeight * iy, this.tileWidth, this.tileHeight);
     }
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

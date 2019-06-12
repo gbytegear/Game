@@ -9,24 +9,7 @@
 </head>
 <body is="main-controller">
     <canvas is="com-canvas"></canvas>
-    <script src="./src/js/main.js"></script>
-    <script>
-        let character = CanvasObjectModel.createElement('item', {position:[10,10], size:[210,140], origin:"center"}),
-        body = CanvasObjectModel.createElement('image', {position:[0,0], size:[210,140], src: "./src/img/textures/characters/gray_cloack/body.png"}),
-        head = CanvasObjectModel.createElement('image', {position:[40,0], size:[120,120],origin:"center", src: "./src/img/textures/characters/gray_cloack/head.png"})
-        character.insert(body);
-        character.insert(head);
-
-        let tilemap = CanvasObjectModel.createElement('tiledMap', {position:[0,0], size:[400,400], tileSize: [51,51], src: "./src/img/tiles/grass.jpg"})
-
-        mainController.canvas.rerenderChangeTimeout(canvas => {
-            canvas.insert(tilemap);
-            canvas.insert(character);
-        });
-
-        // let rect = CanvasObjectModel.createElement('rectangle', {position:[400,400], size:[100,100], color: "black"});
-        // rect.insert( CanvasObjectModel.createElement('rectangle', {position:[10,10], size:[100,100], color: "red"}))
-        // mainController.canvas.insert(rect);
-    </script>
+    <script src="./src/js/CanvasObjectModel.js"></script>
+    <script src="./src/js/game.js"></script>
 </body>
 </html>
