@@ -547,6 +547,8 @@ class MultiDimensionRangeArray {
             return defaultReturn;
         }
 
+        this.clearRanges = () => ranges = new Object;
+
 
     }
 }
@@ -555,19 +557,11 @@ class COMTiledMapElement extends COMElement {
     constructor(properties) {
         super();
         let tileSize = { width: 0, height: 0 },
-            // src = null,
-            // texture = new Image,
             tileStorage = new MultiDimensionRangeArray;
 
+        this.clearTileRange = tileStorage.clearRanges;
+
         Object.defineProperties(this, {
-            // src: {
-            //     get: () => src,
-            //     set: newSrc => {
-            //         src = newSrc;
-            //         texture.src = src;
-            //     }
-            // },
-            // image: { get: () => texture },
 
             defaultTile: {
                 set: src => {
