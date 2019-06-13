@@ -275,7 +275,7 @@ class COMElement {
             index: {
                 get: () => index
             },
-            rerenderIsBlocked:{get: () => renderBlock},
+            rerenderIsBlocked: { get: () => renderBlock },
 
             // Transform Origin
             originX: {
@@ -310,32 +310,32 @@ class COMElement {
             // Relative processing
             anchors: {
                 get: () => anchors,
-                set: newAnchors => {anchors = newAnchors; this.rerender(); }
+                set: newAnchors => { anchors = newAnchors; this.rerender(); }
             }
         });
 
         this.relativeProcessing = () => {
             renderBlock = true;
-            if(anchors.size || parent)switch(anchors.size){
+            if (anchors.size || parent) switch (anchors.size) {
                 case "fill":
-                this.width = parent.width; this.height = parent.height;
-                break; case "fill_width":
-                this.width = parent.width;
-                break; case "fill_height":
-                this.height = parent.height;
+                    this.width = parent.width; this.height = parent.height;
+                    break; case "fill_width":
+                    this.width = parent.width;
+                    break; case "fill_height":
+                    this.height = parent.height;
             };
 
-            if(anchors.position || parent)switch(anchors.position){
+            if (anchors.position || parent) switch (anchors.position) {
                 case "left_top":
-                this.x = 0; this.y = 0;
-                break; case "right_top":
-                this.x = parent.width - this.width; this.y = 0;
-                break; case "left_bottom":
-                this.x = 0; this.y = parent.height - this.height;
-                break; case "right_bottom":
-                this.x = parent.width - this.width; this.y = parent.height - this.height;
-                break; case "center":
-                this.x = parent.width / 2 - this.width / 2; this.y = parent.height / 2 - this.height / 2;
+                    this.x = 0; this.y = 0;
+                    break; case "right_top":
+                    this.x = parent.width - this.width; this.y = 0;
+                    break; case "left_bottom":
+                    this.x = 0; this.y = parent.height - this.height;
+                    break; case "right_bottom":
+                    this.x = parent.width - this.width; this.y = parent.height - this.height;
+                    break; case "center":
+                    this.x = parent.width / 2 - this.width / 2; this.y = parent.height / 2 - this.height / 2;
             };
 
             renderBlock = false;
@@ -384,6 +384,7 @@ class COMElement {
                 return;
                 break;
         };
+        ctx.translate(-this.x, -this.y);
     }
 
     draw(ctx) { }
@@ -512,39 +513,105 @@ class COMImageElement extends COMElement {
 
 // ---------------------------------------------------------------------------------- COM Tiled Map Element
 
+class MultiDimensionRangeArray {
+    constructor() {
+        let ranges = new Object, defaultReturn = null;
+
+        this.setDefault = value => defaultReturn = value;
+
+        this.createRange = (rangesArray, value) => {
+            let rangeString = `${(() => {
+                let result = "";
+                rangesArray.forEach(range => { result += `${range.from},${range.to}/` });
+                return result.substring(0, result.length - 1);
+            })()}`;
+            ranges[rangeString] = value;
+        }
+
+        this.getBy = indexes => {
+            for (let rangeString in ranges) {
+                let range = rangeString.split('/').map(value => {
+                    let range = value.split(',');
+                    return {
+                        from: Number(range[0]),
+                        to: Number(range[1])
+                    };
+                });
+                let compare = true;
+                indexes.forEach((value, index) => {
+                    if (value < range[index].from || value > range[index].to)
+                        compare = false;
+                });
+                if (compare) return ranges[rangeString];
+            }
+            return defaultReturn;
+        }
+
+
+    }
+}
+
 class COMTiledMapElement extends COMElement {
     constructor(properties) {
         super();
         let tileSize = { width: 0, height: 0 },
-            src = null,
-            texture = new Image;
+            // src = null,
+            // texture = new Image,
+            tileStorage = new MultiDimensionRangeArray;
 
         Object.defineProperties(this, {
-            src: {
-                get: () => src,
-                set: newSrc => {
-                    src = newSrc;
-                    texture.src = src;
+            // src: {
+            //     get: () => src,
+            //     set: newSrc => {
+            //         src = newSrc;
+            //         texture.src = src;
+            //     }
+            // },
+            // image: { get: () => texture },
+
+            defaultTile: {
+                set: src => {
+                    let image = new Image();
+                    image.src = src;
+                    tileStorage.setDefault(image);
+                    this.rerender();
                 }
             },
-            image: { get: () => texture },
+            rangeTile: {
+                set: range => { //{fromX,toX,fromY,toY, src}
+                    let image = new Image();
+                    image.src = range.src;
+                    tileStorage.createRange([{ from: range.fromX, to: range.toX }, { from: range.fromY, to: range.toY }], image);
+                }
+            },
+            rangeTiles: {
+                set: ranges => { //[{fromX,toX,fromY,toY, src}...
+                    ranges.forEach(range => {
+                        let image = new Image();
+                        image.src = range.src;
+                        tileStorage.createRange([{ from: range.fromX, to: range.toX }, { from: range.fromY, to: range.toY }], image);
+                    });
+                }
+            },
+            tileStorage:{get: () => tileStorage},
 
 
-            tileWidth:{
+
+            tileWidth: {
                 get: () => tileSize.width,
                 set: newTileWidth => {
                     tileSize.width = newTileWidth;
                     this.rerender();
                 }
             },
-            tileHeight:{
+            tileHeight: {
                 get: () => tileSize.height,
                 set: newTileHeight => {
                     tileSize.height = newTileHeight;
                     this.rerender();
                 }
             },
-            tileSize:{
+            tileSize: {
                 get: () => tileSize,
                 set: newTileSize => {
                     tileSize.width = newTileSize[0];
@@ -555,7 +622,7 @@ class COMTiledMapElement extends COMElement {
         });
 
 
-        texture.onload = () => this.rerender();
+        // texture.onload = () => this.rerender();
 
         this.setProperties(properties);
     }
@@ -565,7 +632,7 @@ class COMTiledMapElement extends COMElement {
         let end = { ix: Math.ceil((-this.x + document.body.offsetWidth) / this.tileSize.width), iy: Math.ceil((-this.y + document.body.offsetHeight) / this.tileSize.width) };
         for (let iy = start.iy; iy < end.iy; iy++)
             for (let ix = start.ix; ix < end.ix; ix++)
-                ctx.drawImage(this.image, this.tileWidth * ix, this.tileHeight * iy, this.tileWidth, this.tileHeight);
+                ctx.drawImage(this.tileStorage.getBy([ix,iy]), this.tileWidth * ix, this.tileHeight * iy, this.tileWidth, this.tileHeight);
     }
 }
 
