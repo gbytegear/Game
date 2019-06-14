@@ -52,9 +52,24 @@ canvas{
 }
 
 @keyframes daynight {
-    50% {
-        filter: saturate(300%) brightness(20%);
-    }
+    20% {filter: saturate(100%) brightness(100%);}
+    30% {filter: saturate(300%) brightness(20%);}
+    70% {filter: saturate(300%) brightness(20%);}
+    80% {filter: saturate(100%) brightness(100%);}
   }
 
 /* :root{cursor:none;} */
+
+.effects{
+    background-image: url("../img/effcets/smoke.png");
+    background-size: 300vw 300vh;
+    background-position: 0;
+    width: 100%; height: 100%;
+    opacity: .2;
+    animation: effect-movement 10s linear infinite;
+}
+
+@keyframes effect-movement {
+    50%{opacity: .5;}
+    to{background-position: 2000vw 2000vh;}
+}

@@ -210,7 +210,8 @@ class COMElement {
             visible = "true",
             originPoint = { x: 0, y: 0 }, angle = 0,
             anchors = new Object,
-            renderBlock = false;
+            renderBlock = false,
+            shadowProperties = null;
 
         this.children = new Array;
 
@@ -307,6 +308,20 @@ class COMElement {
                 set: newAngle => { angle = newAngle; this.rerender(); }
             },
 
+            //Shadow
+            shadow: {
+                get: () => shadowProperties,
+                set: newShadowProperties => {
+                    if (typeof (newShadowProperties) != "object") return shadowProperties = null;
+                    if(!shadowProperties)shadowProperties = new Object;
+                    if (newShadowProperties.x) shadowProperties.x = newShadowProperties.x;
+                    if (newShadowProperties.y) shadowProperties.y = newShadowProperties.y;
+                    if (newShadowProperties.color) shadowProperties.color = newShadowProperties.color;
+                    if (newShadowProperties.blur) shadowProperties.blur = newShadowProperties.blur;
+                    this.rerender();
+                }
+            },
+
             // Relative processing
             anchors: {
                 get: () => anchors,
@@ -356,34 +371,40 @@ class COMElement {
         if (this.parent) this.parent.rerender();
     }
 
-    transformAndDraw(ctx) {
+    preDrawProcessing(ctx) {
         ctx.translate(this.originX, this.originY);
         ctx.rotate(this.angle * Math.PI / 180);
 
-        this.relativeProcessing();
-        this.draw(ctx);
+        if (this.shadow) {
+            ctx.shadowColor = this.shadow.color;
+            ctx.shadowBlur = this.shadow.blur;
+            ctx.shadowOffsetX = this.shadow.x;
+            ctx.shadowOffsetY = this.shadow.y;
+        }
 
+        this.relativeProcessing();
+        if(this.visible == "true" || this.visible == "only_this")this.draw(ctx);
+
+        if (this.shadow) {
+            ctx.shadowColor = 0;
+            ctx.shadowBlur = 0;
+            ctx.shadowOffsetX = 0;
+            ctx.shadowOffsetY = 0;
+        }
+
+        // ctx.rotate(-(this.angle * Math.PI / 180));
+        ctx.translate(-this.originX, -this.originY);
+        if(this.visible == "true" || this.visible == "only_content")this.drawChilds(ctx);
+
+        ctx.translate(this.originX, this.originY);
+        ctx.rotate(-this.angle * Math.PI / 180);
         ctx.translate(-this.originX, -this.originY);
     }
 
     render(ctx) {
         ctx.beginPath();
         ctx.translate(this.x, this.y);
-        switch (this.visible) {
-            case "true":
-                this.transformAndDraw(ctx);
-                this.drawChilds(ctx);
-                break;
-            case "only_content":
-                this.drawChilds(ctx);
-                break;
-            case "only_this":
-                this.transformAndDraw(ctx);
-                break;
-            case "false":
-                return;
-                break;
-        };
+        this.preDrawProcessing(ctx);
         ctx.translate(-this.x, -this.y);
     }
 
@@ -539,7 +560,7 @@ class MultiDimensionRangeArray {
                 });
                 let compare = true;
                 indexes.forEach((value, index) => {
-                    if (value < range[index].from || value > range[index].to)
+                    if (value < range[index].from || value > range[index].to - 1)
                         compare = false;
                 });
                 if (compare) return ranges[rangeString];
@@ -587,7 +608,7 @@ class COMTiledMapElement extends COMElement {
                     });
                 }
             },
-            tileStorage:{get: () => tileStorage},
+            tileStorage: { get: () => tileStorage },
 
 
 
@@ -626,7 +647,7 @@ class COMTiledMapElement extends COMElement {
         let end = { ix: Math.ceil((-this.x + document.body.offsetWidth) / this.tileSize.width), iy: Math.ceil((-this.y + document.body.offsetHeight) / this.tileSize.width) };
         for (let iy = start.iy; iy < end.iy; iy++)
             for (let ix = start.ix; ix < end.ix; ix++)
-                ctx.drawImage(this.tileStorage.getBy([ix,iy]), this.tileWidth * ix, this.tileHeight * iy, this.tileWidth, this.tileHeight);
+                ctx.drawImage(this.tileStorage.getBy([ix, iy]), this.tileWidth * ix, this.tileHeight * iy, this.tileWidth, this.tileHeight);
     }
 }
 
