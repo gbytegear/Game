@@ -536,41 +536,28 @@ class COMImageElement extends COMElement {
 
 class MultiDimensionRangeArray {
     constructor() {
-        let ranges = new Object, defaultReturn = null;
+        let ranges = new Array, defaultReturn = null;
 
         this.setDefault = value => defaultReturn = value;
 
         this.createRange = (rangesArray, value) => {
-            let rangeString = `${(() => {
-                let result = "";
-                rangesArray.forEach(range => { result += `${range.from},${range.to}/` });
-                return result.substring(0, result.length - 1);
-            })()}`;
-            ranges[rangeString] = value;
+            ranges.push({range: rangesArray, value});
         }
 
         this.getBy = indexes => {
-            for (let rangeString in ranges) {
-                let range = rangeString.split('/').map(value => {
-                    let range = value.split(',');
-                    return {
-                        from: Number(range[0]),
-                        to: Number(range[1])
-                    };
+            for(let i = ranges.length-1; i > -1; i--){
+                let finded = true;
+                ranges[i].range.forEach((range, i) => {
+                    if(range.from > indexes[i] || range.to <= indexes[i])finded = false;
                 });
-                let compare = true;
-                indexes.forEach((value, index) => {
-                    if (value < range[index].from || value > range[index].to - 1)
-                        compare = false;
-                });
-                if (compare) return ranges[rangeString];
+                if(finded)return ranges[i].value;
             }
             return defaultReturn;
         }
 
-        this.clearRanges = () => ranges = new Object;
+        this.clearRanges = () => ranges = new Array;
 
-
+        Object.defineProperty(this,"ranges",{get:()=>ranges});
     }
 }
 

@@ -1,27 +1,58 @@
-let 
-  character = CanvasObjectModel.createElement('item', { size: [78.75, 52.5], origin: "center", anchors: { position: "center" } }),
-  body = CanvasObjectModel.createElement('image', { position: [0, 0], origin: "center", angle:45, anchors: { size: "fill" }, src: "./src/img/textures/characters/gray_cloack/body.png" }),
+const playerCharacter = new class {
+  constructor() {
+    let
+      character = CanvasObjectModel.createElement('item', { size: [78.75, 52.5], origin: "center", anchors: { position: "center" } });
+    this.body = CanvasObjectModel.createElement('image', { position: [0, 0], origin: "center", anchors: { size: "fill" }});
+    this.handL1 = CanvasObjectModel.createElement('image', { position: [0, -15], origin: [10, 45], size: [19, 50]});
+    this.handL2 = CanvasObjectModel.createElement('image', { position: [0, -37], origin: [10, 45], size: [19, 50]});
+    this.handR1 = CanvasObjectModel.createElement('image', { position: [59.75, -15], origin: [10, 45], size: [19, 50]});
+    this.handR2 = CanvasObjectModel.createElement('image', { position: [0, -37], origin: [10, 45], size: [19, 50]});
 
-  handL1 = CanvasObjectModel.createElement('image', { position: [0, -15], origin: [10,45],angle: -15, size:[19,50], src: "./src/img/textures/characters/gray_cloack/handL1.png" }),
-  handL2 = CanvasObjectModel.createElement('image', { position: [0, -37], origin: [10,45], angle: 50, size:[19,50], src: "./src/img/textures/characters/gray_cloack/handL2.png" }),
+    this.weapon = CanvasObjectModel.createElement('image', { position: [0, -80], origin: [10, 80], size: [20, 128]});
+    this.backpack = CanvasObjectModel.createElement('image', { position: [0, 0], anchors: { size: "fill" }});
+    this.head = CanvasObjectModel.createElement('image', { position: [15, 0], size: [45, 45], origin: "center", src: "./src/img/textures/characters/gray_cloack/head.png" });
 
-  handR1 = CanvasObjectModel.createElement('image', { position: [59.75, -15], origin: [10,45], angle: 20, size:[19,50], src: "./src/img/textures/characters/gray_cloack/handL1.png" }),
-  handR2 = CanvasObjectModel.createElement('image', { position: [0, -37], origin: [10,45], angle: -100, size:[19,50], src: "./src/img/textures/characters/gray_cloack/handL2.png" }),
-  weapon = CanvasObjectModel.createElement('image', { position: [0, -80], origin: [10,80], angle: 45, size:[20,128], src: "./src/img/textures/characters/weapon/machingun.png" }),
+    character.insert(this.body);
+    this.handL1.insert(this.handL2);
+    this.body.insert(this.handL1);
+    this.handR2.insert(this.weapon);
+    this.handR1.insert(this.handR2);
+    this.body.insert(this.backpack);
+    this.body.insert(this.handR1);
+    this.body.insert(this.head);
 
-  backpack = CanvasObjectModel.createElement('image', { position: [0, 0], anchors: { size: "fill" }, src: "./src/img/textures/characters/gray_cloack/backpack.png" }),
-  head = CanvasObjectModel.createElement('image', { position: [15, 0], size: [45, 45], origin: "center", angle:-45, src: "./src/img/textures/characters/gray_cloack/head.png" });
+    this.currentAnimation = null;
+    this.currentAnimationFrame = 0;
 
-character.insert(body);
-handL1.insert(handL2);
-body.insert(handL1);
-handR2.insert(weapon);
-handR1.insert(handR2);
-body.insert(backpack);
-body.insert(handR1);
-body.insert(head);
+    Object.defineProperties(this, {
+      character: {
+        get: () => character
+      }
+    });
 
-let map = new class {
+    this.changeEquipment('grayCloack');
+    this.changeAnimation('noWeapon');
+  }
+
+  changeEquipment(name){
+    let equipment = JSON.parse(localStorage.getItem('equipment'))[name];
+    for(let textures in equipment)
+      this[textures].src = equipment[textures];
+  }
+
+  changeAnimation(name, index = 0){
+    this.currentAnimation = JSON.parse(localStorage.getItem('animations'))[name];
+    this.setAnimationFrame(index);
+  }
+
+  setAnimationFrame(index){
+    let frame = this.currentAnimation[this.currentAnimationFrame];
+    for(let parts in frame)
+      this[parts].setProperties(frame[parts]);
+  }
+}
+
+const map = new class {
   constructor() {
     this.tiles = CanvasObjectModel.createElement('tiledMap', {
       position: [0, 0],
@@ -86,54 +117,12 @@ mainController.canvas.rerenderChangeTimeout(canvas => {
   canvas.insert(map.backgroundDecorations);
   canvas.insert(map.solidObjects);
   canvas.insert(map.foregroundDecorations);
-  canvas.insert(character);
+  canvas.insert(playerCharacter.character);
 });
 
 
 //Загрузка карты
-map.loadMap({
-  tiles: {
-    defaultTile: "./src/img/tiles/grass1.jpg",
-    rangeTiles: [
-      { fromX: -2, toX: 21, fromY: -5, toY: 5, src: "./src/img/tiles/planks.jpg" },
-      { fromX: -4, toX: 0, fromY: -3, toY: 7, src: "./src/img/tiles/planks.jpg" },
-    ]
-  },
-  solid: [
-    //----ROOM 0x0
-    //Walls
-    { type: 'rectangle', properties: { position: [-200, -500], size: [10, 200], color: "black", //corner left
-    shadow:{x: 0, y: 0, color: "#000", blur: 30} } }, 
-    { type: 'rectangle', properties: { position: [-400, -300], size: [210, 10], color: "black", //corner top
-    shadow:{x: 0, y: 0, color: "#000", blur: 30} } }, 
-    { type: 'rectangle', properties: { position: [-200, -500], size: [2300, 10], color: "black", //top
-    shadow:{x: 0, y: 0, color: "#000", blur: 30} } }, 
-    { type: 'rectangle', properties: { position: [-400, -300], size: [10, 800], color: "black", //left
-    shadow:{x: 0, y: 0, color: "#000", blur: 30} } },
-    { type: 'rectangle', properties: { position: [500, -500], size: [10, 200], color: "black", //right 1
-    shadow:{x: 0, y: 0, color: "#000", blur: 30} } },
-    { type: 'rectangle', properties: { position: [500, -100], size: [10, 610], color: "black", //right 2
-    shadow:{x: 0, y: 0, color: "#000", blur: 30} } },
-    { type: 'rectangle', properties: { position: [-400, 500], size: [200, 10], color: "black", //bottom 1
-    shadow:{x: 0, y: 0, color: "#000", blur: 30} } },
-    { type: 'rectangle', properties: { position: [0, 500], size: [1000, 10], color: "black", //bottom 2
-    shadow:{x: 0, y: 0, color: "#000", blur: 30} } },
-
-    { type: 'rectangle', properties: { position: [-100, -500], size: [100, 10], color: "#fff8", //top window 1
-    shadow:{x: 0, y: 30, color: "white", blur: 40} } }, 
-    { type: 'rectangle', properties: { position: [100, -500], size: [100, 10], color: "#fff8", //top window 2
-    shadow:{x: 0, y: 30, color: "white", blur: 40} } }, 
-    { type: 'rectangle', properties: { position: [300, -500], size: [100, 10], color: "#fff8", //top window 3
-    shadow:{x: 0, y: 30, color: "white", blur: 40} } }, 
-
-    //----ROOM 1x0
-  ]
-});
-
-
-
-//{ type: 'image', properties: { position: [600, 100], size: [100, 100], shadow:{x: 20, y: 20, color: "#0008", blur: 10}, src: "./src/img/textures/box.jpg" } },
-//{ type: 'rectangle', properties: { position: [-500, -500], size: [1100, 5], color: "black" } },
+map.loadMap(JSON.parse(localStorage.getItem('map')).home);
 
 
 
@@ -160,19 +149,24 @@ playerPosition = { x: 0, y: 0 },
   playerRunningSpeed = 5;
 
 document.addEventListener('keydown', e => {
-  if (e.keyCode === 38 /* up */ || e.keyCode === 87 /* w */) up = true;
-  if (e.keyCode === 39 /* right */ || e.keyCode === 68 /* d */) right = true;
-  if (e.keyCode === 40 /* down */ || e.keyCode === 83 /* s */) down = true;
-  if (e.keyCode === 37 /* left */ || e.keyCode === 65 /* a */) left = true;
+  if (e.keyCode === 38 /* up */ || e.keyCode === 87 /* w */ ||  e.keyCode === 38) up = true;
+  if (e.keyCode === 39 /* right */ || e.keyCode === 68 /* d */ ||  e.keyCode === 39) right = true;
+  if (e.keyCode === 40 /* down */ || e.keyCode === 83 /* s */ ||  e.keyCode === 40) down = true;
+  if (e.keyCode === 37 /* left */ || e.keyCode === 65 /* a */ ||  e.keyCode === 37) left = true;
   if (e.keyCode === 16) shift = true;
+
+  if (e.keyCode === 27){
+    let ui = document.querySelector('.menu');
+    if(ui.classList.contains('show')){ui.classList.remove('show')}else ui.classList.add('show');
+  }
 });
 
 
 document.addEventListener('keyup', e => {
-  if (e.keyCode === 38 /* up */ || e.keyCode === 87 /* w */) up = false;
-  if (e.keyCode === 39 /* right */ || e.keyCode === 68 /* d */) right = false;
-  if (e.keyCode === 40 /* down */ || e.keyCode === 83 /* s */) down = false;
-  if (e.keyCode === 37 /* left */ || e.keyCode === 65 /* a */) left = false;
+  if (e.keyCode === 38 /* up */ || e.keyCode === 87 /* w */ ||  e.keyCode === 38) up = false;
+  if (e.keyCode === 39 /* right */ || e.keyCode === 68 /* d */ ||  e.keyCode === 39) right = false;
+  if (e.keyCode === 40 /* down */ || e.keyCode === 83 /* s */ ||  e.keyCode === 40) down = false;
+  if (e.keyCode === 37 /* left */ || e.keyCode === 65 /* a */ ||  e.keyCode === 37) left = false;
   if (e.keyCode === 16) shift = false;
 });
 
@@ -185,15 +179,15 @@ const gameLoop = () => {
   if (right) addX += speed;
   if (down) addY += speed;
   if (left) addX -= speed;
-  if (!map.hittTest(playerPosition.x + addX - 25, playerPosition.y - 25, 50, 50)) playerPosition.x += addX;
-  if (!map.hittTest(playerPosition.x - 25, playerPosition.y + addY - 25, 50, 50)) playerPosition.y += addY;
+  if (!map.hittTest(playerPosition.x + addX - 40, playerPosition.y - 40, 80, 80)) playerPosition.x += addX;
+  if (!map.hittTest(playerPosition.x - 40, playerPosition.y + addY - 40, 80, 80)) playerPosition.y += addY;
   mainController.canvas.rerenderChangeTimeout(() => {
     map.changePosition(playerPosition);
-    character.angle = playerAngle;
+    playerCharacter.character.angle = playerAngle;
   })
   return window.requestAnimationFrame(gameLoop)
 }; window.requestAnimationFrame(gameLoop);
 
 document.addEventListener('mousemove', e => {
-  playerAngle = -(180 / Math.PI * Math.atan2(character.x + character.width / 2 - e.clientX, character.y + character.height / 2 - e.clientY));
+  playerAngle = -(180 / Math.PI * Math.atan2(playerCharacter.character.x + playerCharacter.character.width / 2 - e.clientX, playerCharacter.character.y + playerCharacter.character.height / 2 - e.clientY));
 });
