@@ -6,8 +6,12 @@ localStorage.setItem('map',JSON.stringify({
             { fromX: -2, toX: 21, fromY: -5, toY: 5, src: "./src/img/tiles/planks.jpg" }, //planks.jpg
             { fromX: -4, toX: 0, fromY: -3, toY: 7, src: "./src/img/tiles/planks.jpg" }, //planks.jpg
             { fromX: -4, toX: -2, fromY: 7, toY: 10, src: "./src/img/tiles/planks.jpg" }, //planks.jpg
+            { fromX: -6, toX: 1, fromY: 10, toY: 20, src: "./src/img/tiles/planks.jpg" }, //planks.jpg
           ]
         },
+
+        foreground:[],
+
         solid: [
           //----ROOM 0x0 left-top(-400,-500)
           //Walls
@@ -78,7 +82,15 @@ localStorage.setItem('map',JSON.stringify({
               shadow: { x: 0, y: 30, color: "white", blur: 40 }
             }
           },
-      
+
+
+
+
+
+
+
+
+
           //----ROOM 0x1 left-top(-400,500)
           {
             type: 'rectangle', properties: {
@@ -99,8 +111,61 @@ localStorage.setItem('map',JSON.stringify({
             }
           },
 
-          //----ROOM 0x1 left-top(-400,500)
-          
+
+
+
+
+
+
+
+
+
+          //----ROOM 0x2 left-top(-400,500)
+          {
+            type: 'rectangle', properties: {
+              position: [-600, 1000], size: [210, 10], color: "black", //top 1
+              shadow: { x: 0, y: 0, color: "#000", blur: 30 }
+            }
+          },
+          {
+            type: 'rectangle', properties: {
+              position: [-200, 1000], size: [310, 10], color: "black", //top 2
+              shadow: { x: 0, y: 0, color: "#000", blur: 30 }
+            }
+          },
+          {
+            type: 'rectangle', properties: {
+              position: [-600, 1000], size: [10, 1010], color: "black", //left
+              shadow: { x: 0, y: 0, color: "#000", blur: 30 }
+            }
+          },
+          {
+            type: 'rectangle', properties: {
+              position: [100, 1000], size: [10, 200], color: "black", //right
+              shadow: { x: 0, y: 0, color: "#000", blur: 30 }
+            }
+          },
+
+          {
+            type: 'rectangle', properties: {
+              position: [100, 1400], size: [10, 200], color: "black", //right
+              shadow: { x: 0, y: 0, color: "#000", blur: 30 }
+            }
+          },
+
+          {
+            type: 'rectangle', properties: {
+              position: [100, 1800], size: [10, 210], color: "black", //right
+              shadow: { x: 0, y: 0, color: "#000", blur: 30 }
+            }
+          },
+
+          {
+            type: 'rectangle', properties: {
+              position: [-600, 2000], size: [700, 10], color: "black", //right
+              shadow: { x: 0, y: 0, color: "#000", blur: 30 }
+            }
+          },
         ]
       }
 }));
@@ -109,46 +174,50 @@ localStorage.setItem('map',JSON.stringify({
 
 localStorage.setItem('equipment',JSON.stringify({
     //Clothes
-    grayCloack: {
+    clth_grayCloack: {
         body:"./src/img/textures/characters/gray_cloack/body.png",
         handL1:"./src/img/textures/characters/gray_cloack/handL1.png",
         handL2:"./src/img/textures/characters/gray_cloack/handL2.png",
         handR1:"./src/img/textures/characters/gray_cloack/handR1.png",
         handR2:"./src/img/textures/characters/gray_cloack/handR2.png",
     },
+
+    //Backpacks
+    bp_empty: {
+      backpack:""
+    },
+    bp_small: {
+      backpack:"./src/img/textures/characters/gray_cloack/backpack.png"
+    },
+
     //Weapon
-    machinegun: {
-        weapon: "./src/img/textures/characters/weapon/machingun.png"
+    wpn_empty: {
+      weapon: "",
+      animationType: "noweapon"
+    },
+    wpn_machinegun: {
+        weapon: "./src/img/textures/characters/weapon/machingun.png",
+        animationType: "rifle"
     }
 }));
 
 
 localStorage.setItem('animations',JSON.stringify({
-    noWeapon: [{
+    noweapon: [{
         head:{angle: 0},
         body:{angle: 0},
-        handL1:{angle: -20},
+        handL1:{angle: -20, visible: 'false'},
         handL2:{angle: 60},
-        handR1:{angle: 30},
+        handR1:{angle: 30, visible: 'false'},
         handR2:{angle: -90},
     }],
-    machinegun: [{
+    rifle: [{
         head:{angle: -45},
         body:{angle: 45},
-        handL1:{angle: -15},
+        handL1:{angle: -15, visible: 'true'},
         handL2:{angle: 50},
-        handR1:{angle: 20},
+        handR1:{angle: 20, visible: 'true'},
         handR2:{angle: -100},
         weapon:{angle: 38}
     }],
 }));
-
-// character = CanvasObjectModel.createElement('item', { size: [78.75, 52.5], origin: "center", anchors: { position: "center" } }),
-// body = CanvasObjectModel.createElement('image', { position: [0, 0], origin: "center", angle: 45, anchors: { size: "fill" }, src: "./src/img/textures/characters/gray_cloack/body.png" }),
-// handL1 = CanvasObjectModel.createElement('image', { position: [0, -15], origin: [10, 45], angle: -15, size: [19, 50], src: "./src/img/textures/characters/gray_cloack/handL1.png" }),
-// handL2 = CanvasObjectModel.createElement('image', { position: [0, -37], origin: [10, 45], angle: 50, size: [19, 50], src: "./src/img/textures/characters/gray_cloack/handL2.png" }),
-// handR1 = CanvasObjectModel.createElement('image', { position: [59.75, -15], origin: [10, 45], angle: 20, size: [19, 50], src: "./src/img/textures/characters/gray_cloack/handL1.png" }),
-// handR2 = CanvasObjectModel.createElement('image', { position: [0, -37], origin: [10, 45], angle: -100, size: [19, 50], src: "./src/img/textures/characters/gray_cloack/handL2.png" }),
-// weapon = CanvasObjectModel.createElement('image', { position: [0, -80], origin: [10, 80], angle: 38, size: [20, 128], src: "./src/img/textures/characters/weapon/machingun.png" }),
-// backpack = CanvasObjectModel.createElement('image', { position: [0, 0], anchors: { size: "fill" }, src: "./src/img/textures/characters/gray_cloack/backpack.png" }),
-// head = CanvasObjectModel.createElement('image', { position: [15, 0], size: [45, 45], origin: "center", angle: -45, src: "./src/img/textures/characters/gray_cloack/head.png" });

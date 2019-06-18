@@ -2,7 +2,7 @@
  * MainController / Body
  * Canvas JSON Object Model (COM)
  * COM Canavas
- * COM Item Elements
+ * COM Item Element - PROTOTYPE OF ALL COM ELEMENTS
  * COM Rectangle Element
  * COM Image Element
  * COM Tiled Map Element
@@ -200,7 +200,7 @@ customElements.define('com-canvas', class extends HTMLCanvasElement {
 
 
 
-// ---------------------------------------------------------------------------------- COM Item Elements
+// ---------------------------------------------------------------------------------- COM Item Elements - PROTOTYPE OF ALL COM ELEMENTS
 
 class COMElement {
     constructor(properties) {
@@ -211,16 +211,61 @@ class COMElement {
             originPoint = { x: 0, y: 0 }, angle = 0,
             anchors = new Object,
             renderBlock = false,
-            shadowProperties = null;
-
+            shadowProperties = null,
+            dynamicProperties = new Object;
         this.children = new Array;
 
+
+
+
+        
+        // ФУНКЦИИ С ПРЯМЫМ ДОСТУПОМ К СВОЙСТВАМ
         this.changeParent = newParent => {
             if (this.parent) this.parent.removeChild(this);
             parent = newParent;
-            index = parent.children.indexOf(this);
+            if (this.parent) index = parent.children.indexOf(this);
         }
 
+        this.relativeProcessing = () => {
+            renderBlock = true;
+            if (anchors.size || parent) switch (anchors.size) {
+                case "fill":
+                    this.width = parent.width; this.height = parent.height;
+                break; case "fill_width":
+                    this.width = parent.width;
+                break; case "fill_height":
+                    this.height = parent.height;
+            };
+
+            if (anchors.position || parent) switch (anchors.position) {
+                case "left_top":
+                    this.x = 0; this.y = 0;
+                break; case "right_top":
+                    this.x = parent.width - this.width; this.y = 0;
+                break; case "left_bottom":
+                    this.x = 0; this.y = parent.height - this.height;
+                break; case "right_bottom":
+                    this.x = parent.width - this.width; this.y = parent.height - this.height;
+                break; case "center":
+                    this.x = parent.width / 2 - this.width / 2; this.y = parent.height / 2 - this.height / 2;
+            };
+
+            renderBlock = false;
+        }
+
+        this.dynamicProcessing = () => {
+            if(dynamicProperties.x)x += dynamicProperties.x;
+            if(dynamicProperties.y)y += dynamicProperties.y;
+            if(dynamicProperties.width)width += dynamicProperties.width;
+            if(dynamicProperties.height)height += dynamicProperties.height;
+            if(dynamicProperties.fx)dynamicProperties.fx();
+        };
+
+
+
+
+
+        // СВОЙСТВА
         Object.defineProperties(this, {
             //Position
             x: {
@@ -326,52 +371,45 @@ class COMElement {
             anchors: {
                 get: () => anchors,
                 set: newAnchors => { anchors = newAnchors; this.rerender(); }
+            },
+
+            //Dynamic
+            dynamicProperties: {
+                get:() => dynamicProperties,
+                set:newDynamicProperties => {
+                    dynamicProperties = newDynamicProperties;
+                    if(typeof(dynamicProperties.fx) == "string")dynamicProperties.fx = eval(dynamicProperties.fx);
+                }
             }
         });
-
-        this.relativeProcessing = () => {
-            renderBlock = true;
-            if (anchors.size || parent) switch (anchors.size) {
-                case "fill":
-                    this.width = parent.width; this.height = parent.height;
-                    break; case "fill_width":
-                    this.width = parent.width;
-                    break; case "fill_height":
-                    this.height = parent.height;
-            };
-
-            if (anchors.position || parent) switch (anchors.position) {
-                case "left_top":
-                    this.x = 0; this.y = 0;
-                    break; case "right_top":
-                    this.x = parent.width - this.width; this.y = 0;
-                    break; case "left_bottom":
-                    this.x = 0; this.y = parent.height - this.height;
-                    break; case "right_bottom":
-                    this.x = parent.width - this.width; this.y = parent.height - this.height;
-                    break; case "center":
-                    this.x = parent.width / 2 - this.width / 2; this.y = parent.height / 2 - this.height / 2;
-            };
-
-            renderBlock = false;
-        }
 
         this.setProperties(properties);
     }
 
+    
+
+
+
+
+    // ФУНКЦИОНАЛЬНЫЕ ЦЕПОЧКИ ДЛЯ ПЕРЕРИСОВКИ
     rerender() {
         if (this.parent && !this.rerenderIsBlocked)
             this.parent.rerender();
     }
 
-    insert(element) {
-        // element.index = this.children.length;
-        this.children.push(element);
-        element.changeParent(this);
-        if (this.parent) this.parent.rerender();
+    render(ctx) {
+        this.drawProcessing(ctx);
     }
 
-    preDrawProcessing(ctx) {
+
+
+
+
+    //ОТРИСОВКА
+    drawProcessing(ctx) {
+        ctx.beginPath();
+        this.dynamicProcessing();
+        ctx.translate(this.x, this.y);
         ctx.translate(this.originX, this.originY);
         ctx.rotate(this.angle * Math.PI / 180);
 
@@ -382,7 +420,7 @@ class COMElement {
             ctx.shadowOffsetY = this.shadow.y;
         }
 
-        this.relativeProcessing();
+        this.relativeProcessing();  
         if(this.visible == "true" || this.visible == "only_this")this.draw(ctx);
 
         if (this.shadow) {
@@ -399,26 +437,41 @@ class COMElement {
         ctx.translate(this.originX, this.originY);
         ctx.rotate(-this.angle * Math.PI / 180);
         ctx.translate(-this.originX, -this.originY);
-    }
-
-    render(ctx) {
-        ctx.beginPath();
-        ctx.translate(this.x, this.y);
-        this.preDrawProcessing(ctx);
         ctx.translate(-this.x, -this.y);
     }
 
-    draw(ctx) { }
+    draw(ctx) {}
 
     drawChilds(ctx) { this.children.forEach(element => element.render(ctx)); }
 
+
+
+
+
+    //УСТАНОВКА СВОЙСТВ ИЗ JSON-ОБЪЕКТА
     setProperties(properties) {
         for (let prop in properties)
             this[prop] = properties[prop];
     }
 
-    removeChild(element) {
 
+
+
+    // УДАЛЕНИЕ/ВСТАВКА ЭЛЕМЕНТОВ
+    insert(element) {
+        this.children.push(element);
+        element.changeParent(this);
+        if (this.parent) this.parent.rerender();
+    }
+
+    removeChild(element) {
+        this.children.splice(this.children.indexOf(element),1);
+        this.rerender();
+    }
+
+    remove() {
+        if (this.parent) this.parent.removeChild(this);
+        this.changeParent(null);
     }
 };
 
