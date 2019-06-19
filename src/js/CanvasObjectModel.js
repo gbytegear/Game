@@ -207,9 +207,13 @@ class COMElement {
         let index = null, parent = null,
             x = 0, y = 0,
             width = 0, height = 0,
+
             visible = "true",
+
             originPoint = { x: 0, y: 0 }, angle = 0,
+
             anchors = new Object,
+
             renderBlock = false,
             shadowProperties = null,
             dynamicProperties = new Object;
@@ -220,37 +224,40 @@ class COMElement {
 
         
         // ФУНКЦИИ С ПРЯМЫМ ДОСТУПОМ К СВОЙСТВАМ
-        this.changeParent = newParent => {
-            if (this.parent) this.parent.removeChild(this);
-            parent = newParent;
+        this.changeIndex = () => {
+            index = null;
             if (this.parent) index = parent.children.indexOf(this);
         }
 
+        this.changeParent = newParent => {
+            if (this.parent) this.parent.removeChild(this);
+            parent = newParent;
+            index = null;
+            
+        }
+
         this.relativeProcessing = () => {
-            renderBlock = true;
             if (anchors.size || parent) switch (anchors.size) {
                 case "fill":
-                    this.width = parent.width; this.height = parent.height;
+                    width = parent.width; height = parent.height;
                 break; case "fill_width":
-                    this.width = parent.width;
+                    width = parent.width;
                 break; case "fill_height":
-                    this.height = parent.height;
+                    height = parent.height;
             };
 
             if (anchors.position || parent) switch (anchors.position) {
                 case "left_top":
-                    this.x = 0; this.y = 0;
+                    x = 0; y = 0;
                 break; case "right_top":
-                    this.x = parent.width - this.width; this.y = 0;
+                    x = parent.width - width; y = 0;
                 break; case "left_bottom":
-                    this.x = 0; this.y = parent.height - this.height;
+                    x = 0; this.y = parent.height - height;
                 break; case "right_bottom":
-                    this.x = parent.width - this.width; this.y = parent.height - this.height;
+                    x = parent.width - width; y = parent.height - height;
                 break; case "center":
-                    this.x = parent.width / 2 - this.width / 2; this.y = parent.height / 2 - this.height / 2;
+                    x = parent.width / 2 - width / 2; y = parent.height / 2 - height / 2;
             };
-
-            renderBlock = false;
         }
 
         this.dynamicProcessing = () => {
@@ -321,7 +328,7 @@ class COMElement {
             index: {
                 get: () => index
             },
-            rerenderIsBlocked: { get: () => renderBlock },
+            renderBlock: { get: () => renderBlock, set: value => renderBlock = value },
 
             // Transform Origin
             originX: {
@@ -393,12 +400,8 @@ class COMElement {
 
     // ФУНКЦИОНАЛЬНЫЕ ЦЕПОЧКИ ДЛЯ ПЕРЕРИСОВКИ
     rerender() {
-        if (this.parent && !this.rerenderIsBlocked)
+        if (this.parent && !this.renderBlock)
             this.parent.rerender();
-    }
-
-    render(ctx) {
-        this.drawProcessing(ctx);
     }
 
 
@@ -406,7 +409,7 @@ class COMElement {
 
 
     //ОТРИСОВКА
-    drawProcessing(ctx) {
+    render(ctx) {
         ctx.beginPath();
         this.dynamicProcessing();
         ctx.translate(this.x, this.y);
@@ -464,14 +467,23 @@ class COMElement {
         if (this.parent) this.parent.rerender();
     }
 
-    removeChild(element) {
-        this.children.splice(this.children.indexOf(element),1);
-        this.rerender();
+    removeChild(element, renderBlock = false) {
+        let index = this.children.indexOf(element);
+        this.children.splice(index,1);
+        if(this.children.length > index)for(;index < this.children.length; ++index)
+            this.children[index].changeIndex();
+        if(!renderBlock)this.rerender();
+    }
+
+    removeChildByIndex(index) {
+        this.children.splice(index,1);
+        if(this.children.length > index)for(;index < this.children.length; ++index)
+            this.children[index].changeIndex();
+        // this.rerender();
     }
 
     remove() {
-        if (this.parent) this.parent.removeChild(this);
-        this.changeParent(null);
+        if (this.parent) this.parent.removeChild(this, this.renderBlock);
     }
 };
 

@@ -1,3 +1,5 @@
+let creationStack = new Array;
+
 const playerCharacter = new class {
   constructor() {
     let elements = {
@@ -25,8 +27,8 @@ const playerCharacter = new class {
     this.currentAnimationFrame = 0;
 
     Object.defineProperties(this, {
-      rootElement: {get: () => elements.character},
-      elements: {get:()=>elements},
+      rootElement: { get: () => elements.character },
+      elements: { get: () => elements },
       animationType: {
         set: animation => this.changeAnimation(animation)
       }
@@ -40,7 +42,7 @@ const playerCharacter = new class {
   changeEquipment(name) {
     let equipment = JSON.parse(localStorage.getItem('equipment'))[name];
 
-    if(equipment.animationType){
+    if (equipment.animationType) {
       this.changeAnimation(equipment.animationType);
       delete equipment.animationType;
     }
@@ -81,6 +83,8 @@ const map = new class {
     this.backgroundDecorations = CanvasObjectModel.createElement('item', { anchors: { position: "center" } });
     this.solidObjects = CanvasObjectModel.createElement('item', { anchors: { position: "center" } });
     this.foregroundDecorations = CanvasObjectModel.createElement('item', { anchors: { position: "center" } });
+
+    this.mapname = '';
   }
 
   changePosition(position) {
@@ -106,6 +110,11 @@ const map = new class {
         this.solidObjects.children[i].y + this.solidObjects.children[i].height > y
       ) return true;
     return false;
+  }
+
+  loadMapByName(name){
+    this.mapname = name;
+    this.loadMap(JSON.parse(localStorage.getItem('map'))[name]);
   }
 
   loadMap(object) {
@@ -146,7 +155,7 @@ mainController.canvas.rerenderChangeTimeout(canvas => {
 
 
 //Загрузка карты
-map.loadMap(JSON.parse(localStorage.getItem('map')).home);
+map.loadMapByName('home');
 
 
 
@@ -184,6 +193,14 @@ document.addEventListener('keydown', e => {
     window.running = ui.classList.contains('show');
     (ui.classList.contains('show')) ? ui.classList.remove('show') : ui.classList.add('show');
   }
+
+  if(e.keyCode === 81){
+    if(/dead_/.test(map.mapname)){
+      map.loadMapByName(map.mapname.replace("dead_",""));
+    }else{
+      map.loadMapByName("dead_" + map.mapname);
+    }
+  }
 });
 
 
@@ -204,16 +221,33 @@ const movement = () => {
   if (left) addX -= speed;
   if (!map.hitTest(playerPosition.x + addX - 40, playerPosition.y - 40, 80, 80)) playerPosition.x += addX;
   if (!map.hitTest(playerPosition.x - 40, playerPosition.y + addY - 40, 80, 80)) playerPosition.y += addY;
-  mainController.canvas.rerenderChangeTimeout(() => {
-    map.changePosition(playerPosition);
-    playerCharacter.rootElement.angle = playerAngle;
-  })
+
+  map.changePosition(playerPosition);
+  playerCharacter.rootElement.angle = playerAngle;
+
+}
+
+const createObjectsFromStack = () => {
+  creationStack.forEach(element => {
+    switch (element.to) {
+      case "solid":
+        map.solidObjects.insert(element.object);
+      break; case "background":
+        map.backgroundDecorations.insert(element.object);
+      break; case "foreground":
+        map.foregroundDecorations.insert(element.object);
+    }
+  });
+  creationStack = new Array;
 }
 
 let loopIsRunning = true;
 
 const gameLoop = () => {
-  movement();
+  mainController.canvas.rerenderChangeTimeout(() => {
+    createObjectsFromStack();
+    movement();
+  })
   if (loopIsRunning) return window.requestAnimationFrame(gameLoop)
 }; window.requestAnimationFrame(gameLoop);
 
@@ -221,27 +255,29 @@ document.addEventListener('mousemove', e => {
   playerAngle = -(180 / Math.PI * Math.atan2(playerCharacter.rootElement.x + playerCharacter.rootElement.width / 2 - e.clientX, playerCharacter.rootElement.y + playerCharacter.rootElement.height / 2 - e.clientY));
 });
 
-let bulletSpeed = 10;
+let bulletSpeed = 20;
 
 document.addEventListener('click', e => {
   let mouse = {
-    x:e.clientX - document.body.offsetWidth/2,
-    y:e.clientY - document.body.offsetHeight/2
+    x: e.clientX - document.body.offsetWidth / 2,
+    y: e.clientY - document.body.offsetHeight / 2
   };
-  let sx = Math.abs(mouse.x) / ((Math.abs(mouse.x) + Math.abs(mouse.y))/100),
-  sy = Math.abs(mouse.y) / ((Math.abs(mouse.x) + Math.abs(mouse.y))/100);
+  let sx = Math.abs(mouse.x) / ((Math.abs(mouse.x) + Math.abs(mouse.y)) / 100),
+    sy = Math.abs(mouse.y) / ((Math.abs(mouse.x) + Math.abs(mouse.y)) / 100);
   sx = bulletSpeed * sx / 100;
-  if(mouse.x < 0) sx = -sx;
+  if (mouse.x < 0) sx = -sx;
   sy = bulletSpeed * sy / 100;
-  if(mouse.y < 0) sy = -sy;
+  if (mouse.y < 0) sy = -sy;
   console.log({
-    sx,sy,
-    x:playerPosition.x,
-    y:playerPosition.y
+    sx, sy,
+    x: playerPosition.x,
+    y: playerPosition.y
   });
-  let bullet = CanvasObjectModel.createElement('rectangle', { size: [10, 10], origin: "center", position: [playerPosition.x, playerPosition.y], color: "red",
-  deleteStep: 100, currentStep:0, dynamicProperties: {x:sx, y:sy/*, fx:"()=>{if(this.currentStep==this.deleteStep)return this.remove();this.currentStep++}"*/}})
-  map.foregroundDecorations.insert(bullet);
+  let bullet = CanvasObjectModel.createElement('rectangle', {
+    size: [10, 10], origin: "center", angle:playerAngle, position: [playerPosition.x, playerPosition.y], color: "red",
+    deleteStep: 100, currentStep: 0, renderBlock: true, dynamicProperties: { x: sx, y: sy, fx:"()=>{if(this.currentStep==this.deleteStep)this.remove();this.currentStep++}" }
+  })
+  creationStack.push({to:"background", object: bullet});
 })
 
 Object.defineProperty(this, 'running', {
@@ -251,3 +287,12 @@ Object.defineProperty(this, 'running', {
   },
   get: () => loopIsRunning
 });
+
+// setInterval(() => {
+//   setTimeout(()=>{
+//     map.loadMap(JSON.parse(localStorage.getItem('map')).nothome);
+//   },Math.random() * 1000);
+//   setTimeout(()=>{
+//     map.loadMap(JSON.parse(localStorage.getItem('map')).home);
+//   },Math.random() * 1000 + 1000);
+// }, 500);
