@@ -13,7 +13,7 @@
  * 
  */
 
-
+const renderCallChein = false;
 
 
 
@@ -156,16 +156,18 @@ customElements.define('com-canvas', class extends HTMLCanvasElement {
     }
 
     rerenderChangeTimeout(callback) {
+        let oldValue = this.renderBlock;
         this.renderBlock = true;
         callback(this);
-        this.renderBlock = false;
+        this.renderBlock = oldValue;
         this.rerender();
     }
 
     rerenderChangeStop(callback) {
+        let oldValue = this.renderBlock;
         this.renderBlock = true;
         callback(this);
-        this.renderBlock = false;
+        this.renderBlock = oldValue;
     }
 
     render() {
@@ -400,6 +402,7 @@ class COMElement {
 
     // ФУНКЦИОНАЛЬНЫЕ ЦЕПОЧКИ ДЛЯ ПЕРЕРИСОВКИ
     rerender() {
+        if(!renderCallChein)return;
         if (this.parent && !this.renderBlock)
             this.parent.rerender();
     }

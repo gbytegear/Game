@@ -1,6 +1,45 @@
+let mainLoop = new class {
+  constructor(){
+    let functionStack = new Array,
+    block = true,
+    loop = ()=>((!block)?(functionStack.forEach(func => func())):undefined, window.requestAnimationFrame(loop));
+    window.requestAnimationFrame(loop);
+
+    this.insertFunction = (func)=>{functionStack.push(func);return functionStack.length - 1;};
+    this.removeFunctionByIndex = (index)=>{functionStack.splice(index, 1);};
+
+    Object.defineProperties(this, {
+      block: {
+        set: value => block = value,
+        get: () => block
+      }
+    });
+  }
+};
+
+
 let creationStack = new Array;
 
-const playerCharacter = new class {
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+const player = new class Character {
   constructor() {
     let elements = {
       character: CanvasObjectModel.createElement('item', { size: [78.75, 52.5], origin: "center", anchors: { position: "center" } }),
@@ -26,6 +65,17 @@ const playerCharacter = new class {
     this.currentAnimation = null;
     this.currentAnimationFrame = 0;
 
+
+    this.position = { x: 0, y: 0 };
+    this.angle = 0,
+    this.walkingSpeed = 10,
+    this.runningSpeed = 5;
+
+    this.equipment = {
+      body: {name: "clth_grayCloack", props: {}}
+    };
+
+
     Object.defineProperties(this, {
       rootElement: { get: () => elements.character },
       elements: { get: () => elements },
@@ -36,7 +86,6 @@ const playerCharacter = new class {
 
     this.changeEquipment('clth_grayCloack');
     this.changeEquipment('wpn_empty');
-    // this.changeAnimation('noweapon');
   }
 
   changeEquipment(name) {
@@ -62,6 +111,16 @@ const playerCharacter = new class {
       this.elements[parts].setProperties(frame[parts]);
   }
 }
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -149,7 +208,7 @@ mainController.canvas.rerenderChangeTimeout(canvas => {
   canvas.insert(map.tiles);
   canvas.insert(map.backgroundDecorations);
   canvas.insert(map.solidObjects);
-  canvas.insert(playerCharacter.rootElement);
+  canvas.insert(player.rootElement);
   canvas.insert(map.foregroundDecorations);
 });
 
@@ -170,16 +229,19 @@ map.loadMapByName('home');
 
 
 
+
+
+
+
+
+
 // Управление
 let up = false,
   right = false,
   down = false,
   left = false,
-  shift = false
-playerPosition = { x: 0, y: 0 },
-  playerAngle = 0,
-  playerWalkingSpeed = 10,
-  playerRunningSpeed = 5;
+  shift = false;
+
 
 document.addEventListener('keydown', e => {
   if (e.keyCode === 38 /* up */ || e.keyCode === 87 /* w */ || e.keyCode === 38) up = true;
@@ -191,7 +253,7 @@ document.addEventListener('keydown', e => {
   if (e.keyCode === 27) {
     let ui = document.querySelector('.menu');
     window.running = ui.classList.contains('show');
-    (ui.classList.contains('show')) ? ui.classList.remove('show') : ui.classList.add('show');
+    (ui.classList.contains('show')) ? (ui.classList.remove('show'), mainLoop.block = false) : (ui.classList.add('show'), mainLoop.block = true);
   }
 
   if(e.keyCode === 81){
@@ -213,17 +275,17 @@ document.addEventListener('keyup', e => {
 });
 
 const movement = () => {
-  let addX = 0, addY = 0, speed = playerWalkingSpeed;
-  if (shift) speed += playerRunningSpeed;
+  let addX = 0, addY = 0, speed = player.walkingSpeed;
+  if (shift) speed += player.runningSpeed;
   if (up) addY -= speed;
   if (right) addX += speed;
   if (down) addY += speed;
   if (left) addX -= speed;
-  if (!map.hitTest(playerPosition.x + addX - 40, playerPosition.y - 40, 80, 80)) playerPosition.x += addX;
-  if (!map.hitTest(playerPosition.x - 40, playerPosition.y + addY - 40, 80, 80)) playerPosition.y += addY;
+  if (!map.hitTest(player.position.x + addX - 40, player.position.y - 40, 80, 80)) player.position.x += addX;
+  if (!map.hitTest(player.position.x - 40, player.position.y + addY - 40, 80, 80)) player.position.y += addY;
 
-  map.changePosition(playerPosition);
-  playerCharacter.rootElement.angle = playerAngle;
+  map.changePosition(player.position);
+  player.rootElement.angle = player.angle;
 
 }
 
@@ -243,21 +305,22 @@ const createObjectsFromStack = () => {
 
 let loopIsRunning = true;
 
-const gameLoop = () => {
-  mainController.canvas.rerenderChangeTimeout(() => {
-    createObjectsFromStack();
-    movement();
-  })
-  if (loopIsRunning) return window.requestAnimationFrame(gameLoop)
-}; window.requestAnimationFrame(gameLoop);
+// const gameLoop = () => {
+//   mainController.canvas.rerenderChangeTimeout(() => {
+//     createObjectsFromStack();
+//     movement();
+//   })
+//   if (loopIsRunning) return window.requestAnimationFrame(gameLoop)
+// }; window.requestAnimationFrame(gameLoop);
 
 document.addEventListener('mousemove', e => {
-  playerAngle = -(180 / Math.PI * Math.atan2(playerCharacter.rootElement.x + playerCharacter.rootElement.width / 2 - e.clientX, playerCharacter.rootElement.y + playerCharacter.rootElement.height / 2 - e.clientY));
+  player.angle = -(180 / Math.PI * Math.atan2(player.rootElement.x + player.rootElement.width / 2 - e.clientX, player.rootElement.y + player.rootElement.height / 2 - e.clientY));
 });
 
 let bulletSpeed = 20;
 
 document.addEventListener('click', e => {
+  if(mainLoop.block)return;
   let mouse = {
     x: e.clientX - document.body.offsetWidth / 2,
     y: e.clientY - document.body.offsetHeight / 2
@@ -270,29 +333,26 @@ document.addEventListener('click', e => {
   if (mouse.y < 0) sy = -sy;
   console.log({
     sx, sy,
-    x: playerPosition.x,
-    y: playerPosition.y
+    x: player.position.x,
+    y: player.position.y
   });
   let bullet = CanvasObjectModel.createElement('rectangle', {
-    size: [10, 10], origin: "center", angle:playerAngle, position: [playerPosition.x, playerPosition.y], color: "red",
+    size: [10, 10], origin: "center", angle:player.angle, position: [player.position.x, player.position.y], color: "red",
     deleteStep: 100, currentStep: 0, renderBlock: true, dynamicProperties: { x: sx, y: sy, fx:"()=>{if(this.currentStep==this.deleteStep)this.remove();this.currentStep++}" }
   })
   creationStack.push({to:"background", object: bullet});
 })
 
-Object.defineProperty(this, 'running', {
-  set: value => {
-    if (value && !loopIsRunning) window.requestAnimationFrame(gameLoop);
-    loopIsRunning = value;
-  },
-  get: () => loopIsRunning
-});
+// Object.defineProperty(this, 'running', {
+//   set: value => {
+//     if (value && !loopIsRunning) window.requestAnimationFrame(gameLoop);
+//     loopIsRunning = value;
+//   },
+//   get: () => loopIsRunning
+// });
 
-// setInterval(() => {
-//   setTimeout(()=>{
-//     map.loadMap(JSON.parse(localStorage.getItem('map')).nothome);
-//   },Math.random() * 1000);
-//   setTimeout(()=>{
-//     map.loadMap(JSON.parse(localStorage.getItem('map')).home);
-//   },Math.random() * 1000 + 1000);
-// }, 500);
+mainLoop.insertFunction(createObjectsFromStack);
+mainLoop.insertFunction(movement);
+mainLoop.insertFunction(()=>mainController.canvas.render());
+
+mainLoop.block = false

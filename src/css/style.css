@@ -40,7 +40,7 @@ canvas {
     position: fixed;
     left: 0;
     top: 0;
-    background: linear-gradient(45deg, #4040fffa, #ff5e0027);
+    background: #000d;
     visibility: hidden;
     opacity: 0;
     transition: opacity 1s;
@@ -56,7 +56,7 @@ canvas {
 .menu>.header {
     width: calc(100vw - 40px);
     margin-left: 20px;
-    height: 2em;
+    height: 50px;
     position: absolute;
     left: 0;
     top: 0;
@@ -83,7 +83,78 @@ canvas {
 
 .menu>.header>* {
     height: 100%;
-    line-height: 2em;
+    line-height: 50px;
     cursor: pointer;
     user-select: none;
+}
+
+.menu>.content{
+    width: calc(100vw - 24px);
+    height: calc(100vh - 70px);
+    position: absolute;
+    top: 60px;
+    left: 10px;
+    /* border: 2px solid white; */
+}
+
+.menu>.content>.equipment{
+    position: absolute;
+    width: 190px;
+    height: 100%;
+    /* background: #0007; */
+    outline: 2px solid white;
+}
+
+.menu>.content>.inventory{
+    position: absolute;
+    left: 200px;
+    width: calc(100% - 200px);
+    height: 100%;
+    /* background: #0007; */
+    outline: 2px solid white;
+}
+
+
+
+inv-cell{
+    display: block;
+    width: 50px;
+    height: 50px;
+    outline: 2px solid white;
+    background-size: 100%;
+}
+
+inv-cell:active{
+    box-shadow: 0 0 10px 0 white;
+}
+
+inv-cell.selected{
+    box-shadow: 0 0 10px 0 red;
+    outline-color: red;
+}
+
+.menu>.content>.equipment>inv-cell{
+    position: absolute;
+    top: calc(50% - 25px);
+    left: calc(50% - 25px);
+}
+
+.menu>.content>.equipment>inv-cell[type="head"]{
+    margin-top: -60px;
+}
+
+.menu>.content>.equipment>inv-cell[type="pants"]{
+    margin-top: 60px;
+}
+
+.menu>.content>.equipment>inv-cell[type="boots"]{
+    margin-top: 120px;
+}
+
+.menu>.content>.equipment>inv-cell[type="lhand"]{
+    margin-left: -60px;
+}
+
+.menu>.content>.equipment>inv-cell[type="rhand"]{
+    margin-left: 60px;
 }
