@@ -372,7 +372,15 @@ localStorage.setItem('map',JSON.stringify({
 
 localStorage.setItem('equipment',JSON.stringify({
     //Clothes
-    clth_grayCloack: {
+    clth_empty: {
+      body:"./src/img/textures/characters/clothes_empty/body.png",
+      handL1:"./src/img/textures/characters/clothes_empty/handL1.png",
+      handL2:"./src/img/textures/characters/clothes_empty/handL2.png",
+      handR1:"./src/img/textures/characters/clothes_empty/handR1.png",
+      handR2:"./src/img/textures/characters/clothes_empty/handR2.png",
+  },
+
+    clth_gray_cloack: {
         body:"./src/img/textures/characters/gray_cloack/body.png",
         handL1:"./src/img/textures/characters/gray_cloack/handL1.png",
         handL2:"./src/img/textures/characters/gray_cloack/handL2.png",

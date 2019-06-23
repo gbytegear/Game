@@ -129,7 +129,7 @@ customElements.define('com-canvas', class extends HTMLCanvasElement {
         document.body.onresize = () => {
             this.width = document.body.offsetWidth;
             this.height = document.body.offsetHeight;
-            this.rerender();
+            // this.rerender();
         };
 
         Object.defineProperty(this, "children", { get: () => this.ObjectModel });

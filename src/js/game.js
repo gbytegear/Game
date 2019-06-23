@@ -1,12 +1,17 @@
+const ObjectList = new Array;
+let creationStack = new Array;
+
 let mainLoop = new class {
-  constructor(){
+  constructor() {
     let functionStack = new Array,
-    block = true,
-    loop = ()=>((!block)?(functionStack.forEach(func => func())):undefined, window.requestAnimationFrame(loop));
+      block = true,
+      loop = () => ((!block) ? (functionStack.forEach(func => func())) : undefined, window.requestAnimationFrame(loop));
     window.requestAnimationFrame(loop);
 
-    this.insertFunction = (func)=>{functionStack.push(func);return functionStack.length - 1;};
-    this.removeFunctionByIndex = (index)=>{functionStack.splice(index, 1);};
+    this.insertFunction = (func) => { functionStack.push(func); return functionStack.length - 1; };
+    this.removeFunctionByIndex = (index) => { functionStack.splice(index, 1); };
+
+    this.executeNow = () => functionStack.forEach(func => func());
 
     Object.defineProperties(this, {
       block: {
@@ -17,9 +22,7 @@ let mainLoop = new class {
   }
 };
 
-
-let creationStack = new Array;
-
+document.body.addEventListener('resize', () => (mainLoop.block)?mainLoop.executeNow():undefined);
 
 
 
@@ -34,13 +37,11 @@ let creationStack = new Array;
 
 
 
-
-
-
-
+console.error("СДЕЛАЙ НОРМАЛЬНУЮ СИСТЕМУ ПРЕДМЕТОВ, ЭТА КОСЯНАЯ ХУЙНЯ НИКУДА НЕ ГОДИТСЯ");
 
 const player = new class Character {
   constructor() {
+    let self = this;
     let elements = {
       character: CanvasObjectModel.createElement('item', { size: [78.75, 52.5], origin: "center", anchors: { position: "center" } }),
       body: CanvasObjectModel.createElement('image', { position: [0, 0], origin: "center", anchors: { size: "fill" } }),
@@ -50,7 +51,7 @@ const player = new class Character {
       handR2: CanvasObjectModel.createElement('image', { position: [0, -37], origin: [10, 45], size: [19, 50] }),
       weapon: CanvasObjectModel.createElement('image', { position: [0, -80], origin: [10, 80], size: [20, 128] }),
       backpack: CanvasObjectModel.createElement('image', { position: [0, 0], anchors: { size: "fill" } }),
-      head: CanvasObjectModel.createElement('image', { position: [15, 0], size: [45, 45], origin: "center", src: "./src/img/textures/characters/gray_cloack/head.png" })
+      head: CanvasObjectModel.createElement('image', { position: [15, 0], size: [45, 45], origin: "center", src: "./src/img/textures/characters/heads/player.png" })
     };
 
     elements.character.insert(elements.body);
@@ -68,24 +69,67 @@ const player = new class Character {
 
     this.position = { x: 0, y: 0 };
     this.angle = 0,
-    this.walkingSpeed = 10,
-    this.runningSpeed = 5;
+      this.walkingSpeed = 10,
+      this.runningSpeed = 5;
+
+    let equipment = {
+      head: { name: 'empty' },
+      body: { name: "clth_gray_cloack", type: "body"},
+      pants: { name: 'empty' },
+      boots: { name: 'empty' },
+      lhand: { name: 'empty' },
+      rhand: { name: "wpn_machinegun", type: "rhand"}
+    }
 
     this.equipment = {
-      body: {name: "clth_grayCloack", props: {}}
+      self,
+      get head() { return equipment.head },
+      set head(value) {
+        if (value.name == 'empty') return;
+        self.changeEquipment(value.name);
+        equipment.head = value;
+      },
+      get body() { return equipment.body },
+      set body(value) {
+        if (value.name == 'empty') {
+          self.changeEquipment("clth_empty");
+          equipment.body = value;
+          return;
+        }
+        self.changeEquipment(value.name);
+        equipment.body = value;
+      },
+      get pants() { return equipment.pants },
+      set pants(value) {
+        if (value.name == 'empty') return;
+        self.changeEquipment(value.name);
+        equipment.pants = value;
+      },
+      get boots() { return equipment.boots },
+      set boots(value) {
+        if (value.name == 'empty') return;
+        self.changeEquipment(value.name);
+        equipment.boots = value;
+      },
+      get lhand() { return equipment.lhand },
+      set lhand(value) {
+        if (value.name == 'empty') return;
+        self.changeEquipment(value.name);
+        equipment.lhand = value;
+      },
+      get rhand() { return equipment.rhand },
+      set rhand(value) {
+        self.changeEquipment((value.name == "empty") ? 'wpn_empty' : value.name);
+        equipment.rhand = value;
+      }
     };
-
 
     Object.defineProperties(this, {
       rootElement: { get: () => elements.character },
-      elements: { get: () => elements },
-      animationType: {
-        set: animation => this.changeAnimation(animation)
-      }
+      elements: { get: () => elements }
     });
 
-    this.changeEquipment('clth_grayCloack');
-    this.changeEquipment('wpn_empty');
+    for(let item in equipment)this.equipment[item] = equipment[item];
   }
 
   changeEquipment(name) {
@@ -112,7 +156,7 @@ const player = new class Character {
   }
 }
 
-
+ObjectList.player = player;
 
 
 
@@ -171,7 +215,7 @@ const map = new class {
     return false;
   }
 
-  loadMapByName(name){
+  loadMapByName(name) {
     this.mapname = name;
     this.loadMap(JSON.parse(localStorage.getItem('map'))[name]);
   }
@@ -256,10 +300,10 @@ document.addEventListener('keydown', e => {
     (ui.classList.contains('show')) ? (ui.classList.remove('show'), mainLoop.block = false) : (ui.classList.add('show'), mainLoop.block = true);
   }
 
-  if(e.keyCode === 81){
-    if(/dead_/.test(map.mapname)){
-      map.loadMapByName(map.mapname.replace("dead_",""));
-    }else{
+  if (e.keyCode === 81) {
+    if (/dead_/.test(map.mapname)) {
+      map.loadMapByName(map.mapname.replace("dead_", ""));
+    } else {
       map.loadMapByName("dead_" + map.mapname);
     }
   }
@@ -294,9 +338,9 @@ const createObjectsFromStack = () => {
     switch (element.to) {
       case "solid":
         map.solidObjects.insert(element.object);
-      break; case "background":
+        break; case "background":
         map.backgroundDecorations.insert(element.object);
-      break; case "foreground":
+        break; case "foreground":
         map.foregroundDecorations.insert(element.object);
     }
   });
@@ -317,10 +361,10 @@ document.addEventListener('mousemove', e => {
   player.angle = -(180 / Math.PI * Math.atan2(player.rootElement.x + player.rootElement.width / 2 - e.clientX, player.rootElement.y + player.rootElement.height / 2 - e.clientY));
 });
 
-let bulletSpeed = 20;
+let bulletSpeed = 40;
 
 document.addEventListener('click', e => {
-  if(mainLoop.block)return;
+  if (mainLoop.block) return;
   let mouse = {
     x: e.clientX - document.body.offsetWidth / 2,
     y: e.clientY - document.body.offsetHeight / 2
@@ -337,10 +381,10 @@ document.addEventListener('click', e => {
     y: player.position.y
   });
   let bullet = CanvasObjectModel.createElement('rectangle', {
-    size: [10, 10], origin: "center", angle:player.angle, position: [player.position.x, player.position.y], color: "red",
-    deleteStep: 100, currentStep: 0, renderBlock: true, dynamicProperties: { x: sx, y: sy, fx:"()=>{if(this.currentStep==this.deleteStep)this.remove();this.currentStep++}" }
+    size: [3, 40], origin: "center", angle: player.angle, position: [player.position.x - 1.5, player.position.y - 20], color: "#ff08",
+    deleteStep: 100, currentStep: 0, renderBlock: true, dynamicProperties: { x: sx, y: sy, fx: "()=>{if(this.currentStep==this.deleteStep)this.remove();this.currentStep++}" }
   })
-  creationStack.push({to:"background", object: bullet});
+  creationStack.push({ to: "background", object: bullet });
 })
 
 // Object.defineProperty(this, 'running', {
@@ -353,6 +397,6 @@ document.addEventListener('click', e => {
 
 mainLoop.insertFunction(createObjectsFromStack);
 mainLoop.insertFunction(movement);
-mainLoop.insertFunction(()=>mainController.canvas.render());
+mainLoop.insertFunction(() => mainController.canvas.render());
 
 mainLoop.block = false
