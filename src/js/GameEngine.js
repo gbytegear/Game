@@ -22,7 +22,7 @@ let mainLoop = new class {
   }
 };
 
-document.body.addEventListener('resize', () => (mainLoop.block)?mainLoop.executeNow():undefined);
+document.body.addEventListener('resize', () => (mainLoop.block) ? mainLoop.executeNow() : undefined);
 
 
 
@@ -37,9 +37,9 @@ document.body.addEventListener('resize', () => (mainLoop.block)?mainLoop.execute
 
 
 
-console.error("СДЕЛАЙ НОРМАЛЬНУЮ СИСТЕМУ ПРЕДМЕТОВ, ЭТА КОСЯНАЯ ХУЙНЯ НИКУДА НЕ ГОДИТСЯ");
+console.error("СДЕЛАЙ НОРМАЛЬНУЮ СИСТЕМУ ПРЕДМЕТОВ, ЭТА КОСЯЧНАЯ ХУЙНЯ НИКУДА НЕ ГОДИТСЯ");
 
-const player = new class Character {
+class Character {
   constructor() {
     let self = this;
     let elements = {
@@ -72,56 +72,32 @@ const player = new class Character {
       this.walkingSpeed = 10,
       this.runningSpeed = 5;
 
-    let equipment = {
-      head: { name: 'empty' },
-      body: { name: "clth_gray_cloack", type: "body"},
-      pants: { name: 'empty' },
-      boots: { name: 'empty' },
-      lhand: { name: 'empty' },
-      rhand: { name: "wpn_machinegun", type: "rhand"}
-    }
-
+    let equipment = { head: new Item, body: new Item, pants: new Item, boots: new Item, lhand: new Item, rhand: new Item };
+    let equipmentChanged = this.equipmentChanged;
     this.equipment = {
-      self,
       get head() { return equipment.head },
-      set head(value) {
-        if (value.name == 'empty') return;
-        self.changeEquipment(value.name);
-        equipment.head = value;
-      },
       get body() { return equipment.body },
-      set body(value) {
-        if (value.name == 'empty') {
-          self.changeEquipment("clth_empty");
-          equipment.body = value;
-          return;
-        }
-        self.changeEquipment(value.name);
-        equipment.body = value;
-      },
       get pants() { return equipment.pants },
-      set pants(value) {
-        if (value.name == 'empty') return;
-        self.changeEquipment(value.name);
-        equipment.pants = value;
-      },
       get boots() { return equipment.boots },
-      set boots(value) {
-        if (value.name == 'empty') return;
-        self.changeEquipment(value.name);
-        equipment.boots = value;
-      },
       get lhand() { return equipment.lhand },
-      set lhand(value) {
-        if (value.name == 'empty') return;
-        self.changeEquipment(value.name);
-        equipment.lhand = value;
-      },
       get rhand() { return equipment.rhand },
-      set rhand(value) {
-        self.changeEquipment((value.name == "empty") ? 'wpn_empty' : value.name);
-        equipment.rhand = value;
-      }
+
+      set head(value) { equipment.head = value; self.equipmentChanged() },
+      set body(value) { equipment.body = value; self.equipmentChanged() },
+      set pants(value) { equipment.pants = value; self.equipmentChanged() },
+      set boots(value) { equipment.boots = value; self.equipmentChanged() },
+      set lhand(value) { equipment.lhand = value; self.equipmentChanged() },
+      set rhand(value) { equipment.rhand = value; self.equipmentChanged() },
+    };
+    this.stats = {
+      maxHP: 1000,
+
+      defence: 0,
+      walkingSpeed: 0,
+      runningSpeed: 0,
+
+      bulletSpeed: 0,
+      armed: false
     };
 
     Object.defineProperties(this, {
@@ -129,19 +105,34 @@ const player = new class Character {
       elements: { get: () => elements }
     });
 
-    for(let item in equipment)this.equipment[item] = equipment[item];
+    this.equipmentChanged();
   }
 
-  changeEquipment(name) {
-    let equipment = JSON.parse(localStorage.getItem('equipment'))[name];
-
-    if (equipment.animationType) {
-      this.changeAnimation(equipment.animationType);
-      delete equipment.animationType;
+  equipmentChanged() {
+    this.stats = {maxHP: 1000, defence: 0 ,walkingSpeed: 0, runningSpeed: 0, bulletSpeed: 0, armed: false};
+    for (let item in this.equipment) {
+      if (this.equipment[item].name == "empty") {
+        switch (item) {
+          case "body":
+            this.changeTextures(JSON.parse(localStorage.getItem('equipment')).clth_empty.textures);
+          break; case "rhand":
+            let wpn = JSON.parse(localStorage.getItem('equipment')).wpn_empty
+            this.changeTextures(wpn.textures);
+            this.changeAnimation(wpn.animation);
+          break;
+        }
+      } else {
+        if (this.equipment[item].animation) this.changeAnimation(this.equipment[item].animation);
+        this.changeTextures(this.equipment[item].textures);
+        for(let property in this.equipment[item].properties)
+          this.stats[property] = this.equipment[item].properties[property];
+      }
     }
+  }
 
-    for (let textures in equipment)
-      this.elements[textures].src = equipment[textures];
+  changeTextures(textures) {
+    for (let texture in textures)
+      this.elements[texture].src = textures[texture];
   }
 
   changeAnimation(name, index = 0) {
@@ -156,6 +147,7 @@ const player = new class Character {
   }
 }
 
+const player = new Character;
 ObjectList.player = player;
 
 
@@ -347,53 +339,69 @@ const createObjectsFromStack = () => {
   creationStack = new Array;
 }
 
-let loopIsRunning = true;
 
-// const gameLoop = () => {
-//   mainController.canvas.rerenderChangeTimeout(() => {
-//     createObjectsFromStack();
-//     movement();
-//   })
-//   if (loopIsRunning) return window.requestAnimationFrame(gameLoop)
-// }; window.requestAnimationFrame(gameLoop);
+
+
+
 
 document.addEventListener('mousemove', e => {
   player.angle = -(180 / Math.PI * Math.atan2(player.rootElement.x + player.rootElement.width / 2 - e.clientX, player.rootElement.y + player.rootElement.height / 2 - e.clientY));
 });
 
-let bulletSpeed = 40;
-
-document.addEventListener('click', e => {
-  if (mainLoop.block) return;
+document.addEventListener('mousedown', e => {
+  if (mainLoop.block || !player.stats.armed) return;
   let mouse = {
     x: e.clientX - document.body.offsetWidth / 2,
     y: e.clientY - document.body.offsetHeight / 2
-  };
-  let sx = Math.abs(mouse.x) / ((Math.abs(mouse.x) + Math.abs(mouse.y)) / 100),
+  },
+    sx = Math.abs(mouse.x) / ((Math.abs(mouse.x) + Math.abs(mouse.y)) / 100),
     sy = Math.abs(mouse.y) / ((Math.abs(mouse.x) + Math.abs(mouse.y)) / 100);
-  sx = bulletSpeed * sx / 100;
+  sx = player.stats.bulletSpeed * sx / 100;
   if (mouse.x < 0) sx = -sx;
-  sy = bulletSpeed * sy / 100;
+  sy = player.stats.bulletSpeed * sy / 100;
   if (mouse.y < 0) sy = -sy;
-  console.log({
-    sx, sy,
-    x: player.position.x,
-    y: player.position.y
-  });
-  let bullet = CanvasObjectModel.createElement('rectangle', {
-    size: [3, 40], origin: "center", angle: player.angle, position: [player.position.x - 1.5, player.position.y - 20], color: "#ff08",
-    deleteStep: 100, currentStep: 0, renderBlock: true, dynamicProperties: { x: sx, y: sy, fx: "()=>{if(this.currentStep==this.deleteStep)this.remove();this.currentStep++}" }
-  })
-  creationStack.push({ to: "background", object: bullet });
-})
 
-// Object.defineProperty(this, 'running', {
-//   set: value => {
-//     if (value && !loopIsRunning) window.requestAnimationFrame(gameLoop);
-//     loopIsRunning = value;
-//   },
-//   get: () => loopIsRunning
-// });
+  let bullet = CanvasObjectModel.createElement('rectangle', {
+    size: [3, 40],
+    origin: "center",
+    angle: player.angle,
+    position: [player.position.x - 1.5, player.position.y - 20],
+    color: "#ff08",
+
+    deleteStep: 100,
+    currentStep: 0,
+    renderBlock: true,
+    dynamicProperties: {
+      x: sx,
+      y: sy,
+      fx: `()=>{
+        if(this.currentStep==this.deleteStep)this.remove();
+        this.currentStep++
+      }`}
+  });
+
+  creationStack.push({ to: "background", object: bullet });
+});
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 mainLoop.insertFunction(createObjectsFromStack);
 mainLoop.insertFunction(movement);

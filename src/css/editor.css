@@ -1,0 +1,26 @@
+html, body {
+    overflow: hidden !important;
+}
+
+body {
+    width: 100vw;
+    height: 100vh;
+    background-color: #7d7d7d;
+    margin: 0;
+}
+
+canvas {
+    position: fixed;
+    top: 0;
+    left: 0;
+}
+
+#command_line{
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100vw;
+    background: #222;
+    margin: 0; border: none; outline: none;
+    font-size: 2em;
+}
