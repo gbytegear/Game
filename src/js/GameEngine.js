@@ -109,22 +109,22 @@ class Character {
   }
 
   equipmentChanged() {
-    this.stats = {maxHP: 1000, defence: 0 ,walkingSpeed: 0, runningSpeed: 0, bulletSpeed: 0, armed: false};
+    this.stats = { maxHP: 1000, defence: 0, walkingSpeed: 0, runningSpeed: 0, bulletSpeed: 0, armed: false };
     for (let item in this.equipment) {
       if (this.equipment[item].name == "empty") {
         switch (item) {
           case "body":
             this.changeTextures(JSON.parse(localStorage.getItem('equipment')).clth_empty.textures);
-          break; case "rhand":
+            break; case "rhand":
             let wpn = JSON.parse(localStorage.getItem('equipment')).wpn_empty
             this.changeTextures(wpn.textures);
             this.changeAnimation(wpn.animation);
-          break;
+            break;
         }
       } else {
         if (this.equipment[item].animation) this.changeAnimation(this.equipment[item].animation);
         this.changeTextures(this.equipment[item].textures);
-        for(let property in this.equipment[item].properties)
+        for (let property in this.equipment[item].properties)
           this.stats[property] = this.equipment[item].properties[property];
       }
     }
@@ -291,14 +291,6 @@ document.addEventListener('keydown', e => {
     window.running = ui.classList.contains('show');
     (ui.classList.contains('show')) ? (ui.classList.remove('show'), mainLoop.block = false) : (ui.classList.add('show'), mainLoop.block = true);
   }
-
-  if (e.keyCode === 81) {
-    if (/dead_/.test(map.mapname)) {
-      map.loadMapByName(map.mapname.replace("dead_", ""));
-    } else {
-      map.loadMapByName("dead_" + map.mapname);
-    }
-  }
 });
 
 
@@ -317,8 +309,8 @@ const movement = () => {
   if (right) addX += speed;
   if (down) addY += speed;
   if (left) addX -= speed;
-  if (!map.hitTest(player.position.x + addX - 40, player.position.y - 40, 80, 80)) player.position.x += addX;
-  if (!map.hitTest(player.position.x - 40, player.position.y + addY - 40, 80, 80)) player.position.y += addY;
+  if (!map.hitTest(player.position.x + addX - 20, player.position.y - 20, 40, 40)) player.position.x += addX;
+  if (!map.hitTest(player.position.x - 20, player.position.y + addY - 20, 40, 40)) player.position.y += addY;
 
   map.changePosition(player.position);
   player.rootElement.angle = player.angle;

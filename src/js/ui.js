@@ -25,6 +25,7 @@ const content = {
 }
 
 menu.header.addEventListener('click', e => {
+    if(!e.target.dataset.button)return
     menu.content.innerHTML = content[e.target.dataset.button];
     // content[e.target.dataset.button + "_processing"]();
 });

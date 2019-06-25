@@ -10,11 +10,27 @@ let mapObject = {
     foreground: [],
 };
 
+if(localStorage.getItem('editing'))mapObject = JSON.parse(localStorage.getItem('editing'));
+
 let selectionArea = CanvasObjectModel.createElement('item', { anchors: { position: "center" } }),
     selection = CanvasObjectModel.createElement('rectangle', { color: "#fff4" }),
     selecting = false;
 
 selectionArea.insert(selection);
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 let mainLoop = new class {
     constructor() {
@@ -38,6 +54,19 @@ let mainLoop = new class {
 };
 
 document.body.addEventListener('resize', () => (mainLoop.block) ? mainLoop.executeNow() : undefined);
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 const map = new class {
@@ -77,6 +106,7 @@ const map = new class {
     }
 
     loadMap(object) {
+        localStorage.setItem('editing', JSON.stringify(object));
         if (object.tiles) {
             this.tiles.clearTileRange();
             this.tiles.setProperties(object.tiles);
@@ -112,16 +142,31 @@ mainController.canvas.rerenderChangeTimeout(canvas => {
 });
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
 let up = false,
     right = false,
     down = false,
     left = false,
     shift = false,
-    lockMovement = false;
+    lockMovement = false,
+    ctrl = false;
 
 document.addEventListener('keydown', e => {
+    if (e.keyCode === 17) ctrl = true;
     if (e.keyCode === 13) {
-        eval(command_line.value);
+        cliscope.execute(command_line.value);
         command_line.value = "";
     }
     if (lockMovement) return;
@@ -137,6 +182,7 @@ document.addEventListener('keydown', e => {
 
 
 document.addEventListener('keyup', e => {
+    if (e.keyCode === 17) ctrl = false;
     if (e.keyCode === 38 /* up */ || e.keyCode === 87 /* w */ || e.keyCode === 38) up = false;
     if (e.keyCode === 39 /* right */ || e.keyCode === 68 /* d */ || e.keyCode === 39) right = false;
     if (e.keyCode === 40 /* down */ || e.keyCode === 83 /* s */ || e.keyCode === 40) down = false;
@@ -157,26 +203,59 @@ const movement = () => {
 }
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
 document.addEventListener('mousemove', e => {
     info.mouse = { x: e.clientX, y: e.clientY };
     if (selecting) {
-        selection.size = [e.clientX - document.body.offsetWidth / 2 + position.x - selection.position[0], e.clientY - document.body.offsetHeight / 2 + position.y - selection.position[1]];
+        let sz = [
+            e.clientX - document.body.offsetWidth / 2 + position.x - selection.position[0],
+            e.clientY - document.body.offsetHeight / 2 + position.y - selection.position[1]];
+        if (ctrl)
+            sz = [Math.round(sz[0] / (delta * 10)) * delta * 10, Math.round(sz[1] / (delta * 10)) * delta * 10]
+        selection.size = sz;
     }
 });
 
 document.addEventListener('mousedown', e => {
     selection.size = [0, 0];
-    selection.position = [
+    let pos = [
         e.clientX - document.body.offsetWidth / 2 + position.x,
         e.clientY - document.body.offsetHeight / 2 + position.y
     ];
+    if (ctrl)
+        pos = [Math.round(pos[0] / (delta * 10)) * delta * 10, Math.round(pos[1] / (delta * 10)) * delta * 10]
+    selection.position = pos;
     selecting = true;
 })
 
 document.addEventListener('mouseup', e => {
-    selection.size = [e.clientX - document.body.offsetWidth / 2 + position.x - selection.position[0], e.clientY - document.body.offsetHeight / 2 + position.y - selection.position[1]];
+    let sz = [
+        e.clientX - document.body.offsetWidth / 2 + position.x - selection.position[0],
+        e.clientY - document.body.offsetHeight / 2 + position.y - selection.position[1]];
+    if (ctrl)
+        sz = [Math.round(sz[0] / (delta * 10)) * delta * 10, Math.round(sz[1] / (delta * 10)) * delta * 10]
+    selection.size = sz;
     selecting = false;
 })
+
+
+
+
+
+
+
 
 
 
@@ -188,6 +267,8 @@ document.addEventListener('mouseup', e => {
 let info = {
     mouse: { x: 0, y: 0 }
 };
+
+let delta = 1;
 
 const updateInfo = () => {
     devinfo.update({
@@ -250,12 +331,16 @@ customElements.define('dev-mapinfo', class extends HTMLElement {
     }
 })
 
-mainLoop.insertFunction(() => map.loadMap(mapObject));
-mainLoop.insertFunction(movement);
-mainLoop.insertFunction(updateInfo);
-mainLoop.insertFunction(() => mainController.canvas.render());
 
-mainLoop.block = false
+
+
+
+
+
+
+
+
+
 
 
 
@@ -264,25 +349,98 @@ mainLoop.block = false
 command_line.onfocus = () => lockMovement = true;
 command_line.onblur = () => lockMovement = false;
 
-window.selected = null;
+let cliscope = new class {
+    constructor(){
+        let selected = null;
 
-Object.defineProperties(window, {
-    addbg: {
-        get: () => {
-            mapObject.background.push({type: 'rectangle', properties: { color: "#000", position: selection.position, size: selection.size }});
-            selected = mapObject.background[mapObject.background.length - 1]
-        }
-    },
-    addfg: {
-        get: () => {
-            mapObject.foreground.push({type: 'rectangle', properties: { color: "#000", position: selection.position, size: selection.size }});
-            selected = mapObject.foreground[mapObject.background.length - 1]
-        }
-    },
-    addsl: {
-        get: () => {
-            mapObject.solid.push({type: 'rectangle', properties: { color: "#000", position: selection.position, size: selection.size }});
-            selected = mapObject.solid[mapObject.background.length - 1]
-        }
+        Object.defineProperties(window, {
+
+            //Добавление объектов
+            addbg: { //Добавить объект заднего плана
+                get: () => {
+                    mapObject.background.push({ type: 'rectangle', properties: { color: "#000", position: selection.position, size: selection.size } });
+                    selected = mapObject.background[mapObject.background.length - 1];
+                    map.loadMap(mapObject)
+                }
+            },
+            addfg: { //Добавить объект переднего плана
+                get: () => {
+                    mapObject.foreground.push({ type: 'rectangle', properties: { color: "#000", position: selection.position, size: selection.size } });
+                    selected = mapObject.foreground[mapObject.background.length - 1];
+                    map.loadMap(mapObject)
+                }
+            },
+            addsl: { //Добавить твёрдый объект
+                get: () => {
+                    mapObject.solid.push({ type: 'rectangle', properties: { color: "#000", position: selection.position, size: selection.size } });
+                    selected = mapObject.solid[mapObject.background.length - 1];
+                    map.loadMap(mapObject)
+                }
+            },
+        
+            //Выборка объектов
+            selbg: {
+                set: index => {
+                    selected = mapObject.background[index];
+                    selection.position = mapObject.background[index].properties.position;
+                    selection.size = mapObject.background[index].properties.size;
+                }
+            },
+            selfg: {
+                set: index => {
+                    selected = mapObject.foreground[index];
+                    selection.position = mapObject.foreground[index].properties.position;
+                    selection.size = mapObject.foreground[index].properties.size;
+                }
+            },
+            selsl: {
+                set: index => {
+                    selected = mapObject.solid[index];
+                    selection.position = mapObject.solid[index].properties.position;
+                    selection.size = mapObject.solid[index].properties.size;
+                }
+            },
+            sel: {get: ()=>console.log(selected)},
+        
+            //Изменнение свойств объектов
+            color: { set: color => {selected.properties.color = color; map.loadMap(mapObject)} },
+            width: { set: width => {selected.properties.size[0] = width; map.loadMap(mapObject)} },
+            height: { set: height => {selected.properties.size[1] = height; map.loadMap(mapObject)} },
+            move: {},
+            x: { set: x => {selected.properties.position[0] = x; map.loadMap(mapObject)} },
+            y: { set: y => {selected.properties.position[0] = y; map.loadMap(mapObject)} },
+
+            //Тайлы
+            addtl: {
+                set: src => {
+                    let tileinfo = {
+                        fromX: Math.round(selection.position[0] / map.tiles.tileSize.width),
+                        fromY: Math.round(selection.position[1] / map.tiles.tileSize.height),
+                        toX: Math.round(selection.position[0] / map.tiles.tileSize.width) + Math.round(selection.size[0] / map.tiles.tileSize.width),
+                        toY: Math.round(selection.position[1] / map.tiles.tileSize.height) + Math.round(selection.size[1] / map.tiles.tileSize.height),
+                        src
+                    }
+                    mapObject.tiles.rangeTiles.push(tileinfo);
+                    map.loadMap(mapObject)
+                }
+            },
+
+
+            cpmap: {get: () => {
+                navigator.clipboard.writeText(JSON.stringify(mapObject, null, 4)).then(() => {
+                    alert("Success");
+                }).catch(() => alert('Something wrong!'));
+            }}
+        });
+
+        this.execute = command => eval(command);
     }
-})
+}
+
+map.loadMap(mapObject);
+// mainLoop.insertFunction(() => );
+mainLoop.insertFunction(movement);
+mainLoop.insertFunction(updateInfo);
+mainLoop.insertFunction(() => mainController.canvas.render());
+
+mainLoop.block = false
