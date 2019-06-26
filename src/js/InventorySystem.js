@@ -1,3 +1,42 @@
+
+class Inventory extends HTMLElement {
+    constructor() {
+        super();
+    }
+
+    static createStorage(length) {
+        let index = Inventory.length;
+        Inventory.storage.push(new Array);
+        for(let i = 0; i < 100; i++)Inventory.storage[index].push(new Item);
+        return Inventory.storage[index];
+    }
+
+    connectedCallback() {
+        this.style = `
+            display: flex;
+            justify-content: flex-start;
+            align-content: flex-start;
+            flex-wrap: wrap;
+        `;
+        this.loadStrorage();
+    }
+
+    loadStrorage(index = 0){
+        Inventory.storage[index].forEach( (item, i) => {
+            let cell = document.createElement('inv-cell');
+            cell.setAttribute('path',`Inventory/storage/${index}`);
+            cell.setAttribute('index',`${i}`);
+            this.appendChild(cell);
+        });
+    }
+}
+
+Inventory.storage = new Array;
+window.Inventory = Inventory;
+
+
+customElements.define('inv-container', Inventory);
+
 class Item {
     constructor(name = "empty", property = new Object) {
         let data = JSON.parse(localStorage.getItem('equipment'))[name] || {};
@@ -21,7 +60,6 @@ class Item {
 customElements.define('inv-cell', class InvCell extends HTMLElement {
     constructor() {
         super();
-        this.draggable = false;
         this.type = undefined;
 
         this.item = null;
@@ -62,7 +100,7 @@ customElements.define('inv-cell', class InvCell extends HTMLElement {
         if (!newValue) return;
         switch (name) {
             case 'path':
-                let obj = ObjectList;
+                let obj = window;
                 newValue.split('/').forEach(str => obj = obj[(isNaN(Number(str))) ? str : parseInt(str)]);
                 this.container = obj;
 
@@ -77,6 +115,7 @@ customElements.define('inv-cell', class InvCell extends HTMLElement {
     }
 
     connectedCallback() {
+        this.draggable = false;
         this.addEventListener('click', () => this.selected = !this.selected);
     }
 

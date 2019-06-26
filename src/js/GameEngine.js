@@ -1,4 +1,4 @@
-const ObjectList = new Array;
+window.ObjectList = new Array;
 let creationStack = new Array;
 
 let mainLoop = new class {
@@ -68,9 +68,11 @@ class Character {
 
 
     this.position = { x: 0, y: 0 };
-    this.angle = 0,
-      this.walkingSpeed = 10,
-      this.runningSpeed = 5;
+    this.angle = 0;
+    this.walkingSpeed = 10;
+    this.runningSpeed = 5;
+
+    this.inventory = Inventory.createStorage();
 
     let equipment = { head: new Item, body: new Item, pants: new Item, boots: new Item, lhand: new Item, rhand: new Item };
     let equipmentChanged = this.equipmentChanged;

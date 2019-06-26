@@ -6,17 +6,16 @@ const menu = {
 const content = {
     inv: `
     <div class='equipment'>
-        <inv-cell path="player/equipment" type="head" index="head"></inv-cell>
-        <inv-cell path="player/equipment" type="body" index="body"></inv-cell>
-        <inv-cell path="player/equipment" type="pants" index="pants"></inv-cell>
-        <inv-cell path="player/equipment" type="boots" index="boots"></inv-cell>
+        <inv-cell path="ObjectList/player/equipment" type="head" index="head"></inv-cell>
+        <inv-cell path="ObjectList/player/equipment" type="body" index="body"></inv-cell>
+        <inv-cell path="ObjectList/player/equipment" type="pants" index="pants"></inv-cell>
+        <inv-cell path="ObjectList/player/equipment" type="boots" index="boots"></inv-cell>
 
-        <inv-cell path="player/equipment" type="lhand" index="lhand"></inv-cell>
-        <inv-cell path="player/equipment" type="rhand" index="rhand"></inv-cell>
+        <inv-cell path="ObjectList/player/equipment" type="lhand" index="lhand"></inv-cell>
+        <inv-cell path="ObjectList/player/equipment" type="rhand" index="rhand"></inv-cell>
     </div>
-    <div class='inventory'>
-    <inv-cell></inv-cell>
-    </div>
+    <inv-container class='inventory'>
+    </inv-container>
     `, inv_processing: () => {
 
     },
