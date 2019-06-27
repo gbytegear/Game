@@ -8,6 +8,7 @@ let mapObject = {
     background: [],
     solid: [],
     foreground: [],
+    actions: []
 };
 
 if(localStorage.getItem('editing'))mapObject = JSON.parse(localStorage.getItem('editing'));
@@ -349,11 +350,21 @@ customElements.define('dev-mapinfo', class extends HTMLElement {
 command_line.onfocus = () => lockMovement = true;
 command_line.onblur = () => lockMovement = false;
 
+let tiles = {
+    planks: './src/img/tiles/planks.jpg',
+    bricks: './src/img/tiles/bricks.jpg',
+    asphalt: './src/img/tiles/asphalt.jpg'
+};
+
 let cliscope = new class {
     constructor(){
-        let selected = null;
+        let selected = null,
+        mapName = null;
 
         Object.defineProperties(window, {
+
+            tlmode: {get:() => delta = 10},
+            objmode: {get:() => delta = 1},
 
             //Добавление объектов
             addbg: { //Добавить объект заднего плана
@@ -375,6 +386,14 @@ let cliscope = new class {
                     mapObject.solid.push({ type: 'rectangle', properties: { color: "#000", position: selection.position, size: selection.size } });
                     selected = mapObject.solid[mapObject.background.length - 1];
                     map.loadMap(mapObject)
+                }
+            },
+            addac: {
+                set: fx => mapObject.actions.push({x:selection.x, y:selection.y, width: selection.width, height: selection.height, fx: `()=>{${fx}}`})
+            },
+            conn: {
+                set: to => {
+                    addac = `GameEngine.map.loadMapByName("${to}")`;
                 }
             },
         
@@ -421,7 +440,7 @@ let cliscope = new class {
                         src
                     }
                     mapObject.tiles.rangeTiles.push(tileinfo);
-                    map.loadMap(mapObject)
+                    map.loadMap(mapObject);
                 }
             },
 
@@ -430,7 +449,33 @@ let cliscope = new class {
                 navigator.clipboard.writeText(JSON.stringify(mapObject, null, 4)).then(() => {
                     alert("Success");
                 }).catch(() => alert('Something wrong!'));
-            }}
+            }},
+            cpdata: {get: () => {
+                navigator.clipboard.writeText(`localStorage.setItem('map', JSON.stringify(${localStorage.getItem('maps')}));` ).then(() => {
+                    alert("Success");
+                }).catch(() => alert('Something wrong!'));
+            }},
+
+            setdata: {
+                set: data => {
+                    let maps = JSON.parse(localStorage.getItem('maps'));
+                    maps = data;
+                    localStorage.setItem('maps', JSON.stringify(maps));
+                }
+            },
+
+            save: {set:name => {
+                let maps = JSON.parse(localStorage.getItem('maps'));
+                maps[name] = mapObject;
+                localStorage.setItem('maps', JSON.stringify(maps));
+            }},
+            delete: {set: name => {
+                let maps = JSON.parse(localStorage.getItem('maps'));
+                delete maps[name];
+                localStorage.setItem('maps', JSON.stringify(maps));
+            }},
+            load: {set:name => (mapObject = JSON.parse(localStorage.getItem('maps'))[name], map.loadMap(mapObject))},
+            clear: {get: () => (mapObject = {tiles:{defaultTile:"./src/img/tiles/grass1.jpg",rangeTiles:[],},background: [],solid: [],foreground: [],actions: []}, map.loadMap(mapObject))}
         });
 
         this.execute = command => eval(command);
