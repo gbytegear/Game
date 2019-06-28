@@ -10,10 +10,12 @@
 <body is="main-controller">
     <canvas is="com-canvas"></canvas>
     <dev-info></dev-info>
-    <dev-mapinfo></dev-mapinfo>
+    <!-- <dev-mapinfo></dev-mapinfo> -->
+    <json-editor path="mapObject"></json-editor>
     <input type="text" id='command_line' />
     <script src="./src/js/CanvasObjectModel.js"></script>
     <script src="./src/js/editor/EditorEngine.js"></script>
+    <script src="./src/js/editor/JsonEditor.js"></script>
     <style>
         :root{
             cursor: crosshair;

@@ -24,3 +24,12 @@ canvas {
     margin: 0; border: none; outline: none;
     font-size: 2em;
 }
+
+json-editor{
+    position: fixed;
+    right: 0;
+    top: 0;
+    width: 25vw;
+    height: calc(100vh - 2em);
+    white-space: nowrap;
+}

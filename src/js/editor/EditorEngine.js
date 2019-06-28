@@ -1,6 +1,6 @@
 const position = { x: 0, y: 0 };
 
-let mapObject = {
+window.mapObject = {
     tiles: {
         defaultTile: "./src/img/tiles/grass1.jpg",
         rangeTiles: [],
@@ -217,7 +217,7 @@ const movement = () => {
 
 
 
-document.addEventListener('mousemove', e => {
+mainController.canvas.addEventListener('mousemove', e => {
     info.mouse = { x: e.clientX, y: e.clientY };
     if (selecting) {
         let sz = [
@@ -229,7 +229,7 @@ document.addEventListener('mousemove', e => {
     }
 });
 
-document.addEventListener('mousedown', e => {
+mainController.canvas.addEventListener('mousedown', e => {
     selection.size = [0, 0];
     let pos = [
         e.clientX - document.body.offsetWidth / 2 + position.x,
@@ -241,7 +241,7 @@ document.addEventListener('mousedown', e => {
     selecting = true;
 })
 
-document.addEventListener('mouseup', e => {
+mainController.canvas.addEventListener('mouseup', e => {
     let sz = [
         e.clientX - document.body.offsetWidth / 2 + position.x - selection.position[0],
         e.clientY - document.body.offsetHeight / 2 + position.y - selection.position[1]];
@@ -282,7 +282,7 @@ const updateInfo = () => {
         selection_end: { x: selection.x + selection.width, y: selection.y + selection.height }
     });
 
-    devmapinfo.update();
+    if(typeof(devmapinfo) != "undefined")devmapinfo.update();
 }
 
 customElements.define('dev-info', class extends HTMLElement {
@@ -463,7 +463,7 @@ let cliscope = new class {
                     localStorage.setItem('maps', JSON.stringify(maps));
                 }
             },
-
+            reload:{get: () => map.loadMap(mapObject)},
             save: {set:name => {
                 let maps = JSON.parse(localStorage.getItem('maps'));
                 maps[name] = mapObject;
