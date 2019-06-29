@@ -4,6 +4,7 @@
  * COM Canavas
  * COM Item Element - PROTOTYPE OF ALL COM ELEMENTS
  * COM Rectangle Element
+ * COM Image Element
  * COM Tiled Map Element
  * Definition of Elements
  */
@@ -11,6 +12,8 @@
 /* //TODO
  * 
  */
+
+const renderCallChein = false;
 
 
 
@@ -126,6 +129,7 @@ customElements.define('com-canvas', class extends HTMLCanvasElement {
         document.body.onresize = () => {
             this.width = document.body.offsetWidth;
             this.height = document.body.offsetHeight;
+            // this.rerender();
         };
 
         Object.defineProperty(this, "children", { get: () => this.ObjectModel });
@@ -151,6 +155,21 @@ customElements.define('com-canvas', class extends HTMLCanvasElement {
         this.render();
     }
 
+    rerenderChangeTimeout(callback) {
+        let oldValue = this.renderBlock;
+        this.renderBlock = true;
+        callback(this);
+        this.renderBlock = oldValue;
+        this.rerender();
+    }
+
+    rerenderChangeStop(callback) {
+        let oldValue = this.renderBlock;
+        this.renderBlock = true;
+        callback(this);
+        this.renderBlock = oldValue;
+    }
+
     render() {
         this.ObjectModel.forEach(element => {
             this.context.resetTransform();
@@ -159,7 +178,9 @@ customElements.define('com-canvas', class extends HTMLCanvasElement {
         this.context.closePath();
     }
 
-    removeChild(element) {} //TODO
+    removeChild(element) {
+
+    }
 }, { extends: "canvas" });
 
 
@@ -257,11 +278,11 @@ class COMElement {
         Object.defineProperties(this, {
             //Position
             x: {
-                set: newX => x = newX,
+                set: newX => { x = newX; if (this.parent) this.rerender() },
                 get: () => x
             },
             y: {
-                set: newY => y = newY,
+                set: newY => { y = newY; if (this.parent) this.rerender() },
                 get: () => y
             },
             position: {
@@ -269,23 +290,25 @@ class COMElement {
                 set: position => {
                     x = position[0];
                     y = position[1];
+                    this.rerender();
                 }
             },
 
             //Size
             width: {
                 get: () => width,
-                set: newWidth => width = newWidth
+                set: newWidth => { width = newWidth; this.rerender(); }
             },
             height: {
                 get: () => height,
-                set: newHeight => height = newHeight
+                set: newHeight => { height = newHeight; this.rerender(); }
             },
             size: {
                 get: () => [width, height],
                 set: size => {
                     width = size[0];
                     height = size[1];
+                    this.rerender();
                 }
             },
 
@@ -296,6 +319,7 @@ class COMElement {
                     if (newVisible != "true" && newVisible != "false" && newVisible != "only_content" && newVisible != "only_this")
                         return console.error(`${newVisible} is invalid visibility value!`);
                     visible = newVisible;
+                    this.rerender();
                 }
             },
 
@@ -311,11 +335,11 @@ class COMElement {
             // Transform Origin
             originX: {
                 get: () => originPoint.x,
-                set: newOriginX => originPoint.x = newOriginX
+                set: newOriginX => { originPoint.x = newOriginX; this.rerender(); }
             },
             originY: {
                 get: () => originPoint.y,
-                set: newOriginY => originPoint.y = newOriginY
+                set: newOriginY => { originPoint.y = newOriginY; this.rerender(); }
             },
             origin: {
                 get: () => originPoint,
@@ -328,13 +352,14 @@ class COMElement {
                     })();
                     originPoint.x = newOrigin[0];
                     originPoint.y = newOrigin[1];
+                    this.rerender();
                 }
             },
 
             // Rotate Origin
             angle: {
                 get: () => angle,
-                set: newAngle => angle = newAngle
+                set: newAngle => { angle = newAngle; this.rerender(); }
             },
 
             //Shadow
@@ -347,13 +372,14 @@ class COMElement {
                     if (newShadowProperties.y) shadowProperties.y = newShadowProperties.y;
                     if (newShadowProperties.color) shadowProperties.color = newShadowProperties.color;
                     if (newShadowProperties.blur) shadowProperties.blur = newShadowProperties.blur;
+                    this.rerender();
                 }
             },
 
             // Relative processing
             anchors: {
                 get: () => anchors,
-                set: newAnchors => anchors = newAnchors
+                set: newAnchors => { anchors = newAnchors; this.rerender(); }
             },
 
             //Dynamic
@@ -367,6 +393,18 @@ class COMElement {
         });
 
         this.setProperties(properties);
+    }
+
+    
+
+
+
+
+    // ФУНКЦИОНАЛЬНЫЕ ЦЕПОЧКИ ДЛЯ ПЕРЕРИСОВКИ
+    rerender() {
+        if(!renderCallChein)return;
+        if (this.parent && !this.renderBlock)
+            this.parent.rerender();
     }
 
 
@@ -429,6 +467,7 @@ class COMElement {
     insert(element) {
         this.children.push(element);
         element.changeParent(this);
+        if (this.parent) this.parent.rerender();
     }
 
     removeChild(element, renderBlock = false) {
@@ -436,12 +475,14 @@ class COMElement {
         this.children.splice(index,1);
         if(this.children.length > index)for(;index < this.children.length; ++index)
             this.children[index].changeIndex();
+        if(!renderBlock)this.rerender();
     }
 
     removeChildByIndex(index) {
         this.children.splice(index,1);
         if(this.children.length > index)for(;index < this.children.length; ++index)
             this.children[index].changeIndex();
+        // this.rerender();
     }
 
     remove() {
@@ -473,40 +514,70 @@ class COMElement {
 class COMRectangleElement extends COMElement {
     constructor(properties) {
         super();
-        let color = "transparent",
-            src = null,
-            texture = null;
+        let color = "transparent";
 
         Object.defineProperties(this, {
             color: {
                 get: () => color,
-                set: newColor => color = newColor
-            },
-            src: {
-                get: () => src,
-                set: newSrc => {
-                    let image = new Image;
-                    src = newSrc;
-                    image.src = src;
-                    texture = image;
-                }
-            },
-            image: { get: () => texture }
+                set: newColor => { color = newColor; this.rerender(); }
+            }
         })
 
         this.setProperties(properties);
     }
 
     draw(ctx) {
-        if(this.width == 0 || this.height == 0)return;
-        if(this.color != "transparent"){
-            ctx.rect(-this.originX, -this.originY, this.width, this.height);
-            ctx.fillStyle = this.color;
-            ctx.fill();
-        }
-        if(this.image?this.image.complete:false){
-            ctx.drawImage(this.image, -this.originX, -this.originY, this.width, this.height);
-        }
+        ctx.rect(-this.originX, -this.originY, this.width, this.height);
+        ctx.fillStyle = this.color;
+        ctx.fill();
+    }
+};
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// ---------------------------------------------------------------------------------- COM Image Element
+
+class COMImageElement extends COMElement {
+    constructor(properties) {
+        super();
+        let src = null,
+            texture = new Image;
+
+        Object.defineProperties(this, {
+            src: {
+                get: () => src,
+                set: newSrc => {
+                    src = newSrc;
+                    texture.src = src;
+                }
+            },
+            image: { get: () => texture }
+        })
+
+        texture.onload = () => this.rerender();
+
+        this.setProperties(properties);
+    }
+
+    draw(ctx) {
+        ctx.drawImage(this.image, -this.originX, -this.originY, this.width, this.height);
     }
 };
 
@@ -573,6 +644,7 @@ class COMTiledMapElement extends COMElement {
                     let image = new Image();
                     image.src = src;
                     tileStorage.setDefault(image);
+                    this.rerender();
                 }
             },
             rangeTile: {
@@ -599,12 +671,14 @@ class COMTiledMapElement extends COMElement {
                 get: () => tileSize.width,
                 set: newTileWidth => {
                     tileSize.width = newTileWidth;
+                    this.rerender();
                 }
             },
             tileHeight: {
                 get: () => tileSize.height,
                 set: newTileHeight => {
                     tileSize.height = newTileHeight;
+                    this.rerender();
                 }
             },
             tileSize: {
@@ -612,9 +686,13 @@ class COMTiledMapElement extends COMElement {
                 set: newTileSize => {
                     tileSize.width = newTileSize[0];
                     tileSize.height = newTileSize[1];
+                    this.rerender();
                 }
-            },
+            }
         });
+
+
+        // texture.onload = () => this.rerender();
 
         this.setProperties(properties);
     }
@@ -652,5 +730,6 @@ class COMTiledMapElement extends COMElement {
 CanvasObjectModel.defineObjects({
     item: COMElement,
     rectangle: COMRectangleElement,
+    image: COMImageElement,
     tiledMap: COMTiledMapElement
 });
