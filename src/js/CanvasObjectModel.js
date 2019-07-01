@@ -159,7 +159,7 @@ customElements.define('com-canvas', class extends HTMLCanvasElement {
         this.context.closePath();
     }
 
-    removeChild(element) {} //TODO
+    removeChild(element) { } //TODO
 }, { extends: "canvas" });
 
 
@@ -203,7 +203,7 @@ class COMElement {
 
 
 
-        
+
         // ФУНКЦИИ С ПРЯМЫМ ДОСТУПОМ К СВОЙСТВАМ
         this.changeIndex = () => {
             index = null;
@@ -214,39 +214,39 @@ class COMElement {
             if (this.parent) this.parent.removeChild(this);
             parent = newParent;
             index = null;
-            
+
         }
 
         this.relativeProcessing = () => {
             if (anchors.size || parent) switch (anchors.size) {
                 case "fill":
                     width = parent.width; height = parent.height;
-                break; case "fill_width":
+                    break; case "fill_width":
                     width = parent.width;
-                break; case "fill_height":
+                    break; case "fill_height":
                     height = parent.height;
             };
 
             if (anchors.position || parent) switch (anchors.position) {
                 case "left_top":
                     x = 0; y = 0;
-                break; case "right_top":
+                    break; case "right_top":
                     x = parent.width - width; y = 0;
-                break; case "left_bottom":
+                    break; case "left_bottom":
                     x = 0; this.y = parent.height - height;
-                break; case "right_bottom":
+                    break; case "right_bottom":
                     x = parent.width - width; y = parent.height - height;
-                break; case "center":
+                    break; case "center":
                     x = parent.width / 2 - width / 2; y = parent.height / 2 - height / 2;
             };
         }
 
         this.dynamicProcessing = () => {
-            if(dynamicProperties.x)x += dynamicProperties.x;
-            if(dynamicProperties.y)y += dynamicProperties.y;
-            if(dynamicProperties.width)width += dynamicProperties.width;
-            if(dynamicProperties.height)height += dynamicProperties.height;
-            if(dynamicProperties.fx)dynamicProperties.fx();
+            if (dynamicProperties.x) x += dynamicProperties.x;
+            if (dynamicProperties.y) y += dynamicProperties.y;
+            if (dynamicProperties.width) width += dynamicProperties.width;
+            if (dynamicProperties.height) height += dynamicProperties.height;
+            if (dynamicProperties.fx) dynamicProperties.fx();
         };
 
 
@@ -342,7 +342,7 @@ class COMElement {
                 get: () => shadowProperties,
                 set: newShadowProperties => {
                     if (typeof (newShadowProperties) != "object") return shadowProperties = null;
-                    if(!shadowProperties)shadowProperties = new Object;
+                    if (!shadowProperties) shadowProperties = new Object;
                     if (newShadowProperties.x) shadowProperties.x = newShadowProperties.x;
                     if (newShadowProperties.y) shadowProperties.y = newShadowProperties.y;
                     if (newShadowProperties.color) shadowProperties.color = newShadowProperties.color;
@@ -358,10 +358,10 @@ class COMElement {
 
             //Dynamic
             dynamicProperties: {
-                get:() => dynamicProperties,
-                set:newDynamicProperties => {
+                get: () => dynamicProperties,
+                set: newDynamicProperties => {
                     dynamicProperties = newDynamicProperties;
-                    if(typeof(dynamicProperties.fx) == "string")dynamicProperties.fx = eval(dynamicProperties.fx);
+                    if (typeof (dynamicProperties.fx) == "string") dynamicProperties.fx = eval(dynamicProperties.fx);
                 }
             }
         });
@@ -388,8 +388,8 @@ class COMElement {
             ctx.shadowOffsetY = this.shadow.y;
         }
 
-        this.relativeProcessing();  
-        if(this.visible == "true" || this.visible == "only_this")this.draw(ctx);
+        this.relativeProcessing();
+        if (this.visible == "true" || this.visible == "only_this") this.draw(ctx);
 
         if (this.shadow) {
             ctx.shadowColor = 0;
@@ -400,7 +400,7 @@ class COMElement {
 
         // ctx.rotate(-(this.angle * Math.PI / 180));
         ctx.translate(-this.originX, -this.originY);
-        if(this.visible == "true" || this.visible == "only_content")this.drawChilds(ctx);
+        if (this.visible == "true" || this.visible == "only_content") this.drawChilds(ctx);
 
         ctx.translate(this.originX, this.originY);
         ctx.rotate(-this.angle * Math.PI / 180);
@@ -408,7 +408,7 @@ class COMElement {
         ctx.translate(-this.x, -this.y);
     }
 
-    draw(ctx) {}
+    draw(ctx) { }
 
     drawChilds(ctx) { this.children.forEach(element => element.render(ctx)); }
 
@@ -433,14 +433,14 @@ class COMElement {
 
     removeChild(element, renderBlock = false) {
         let index = this.children.indexOf(element);
-        this.children.splice(index,1);
-        if(this.children.length > index)for(;index < this.children.length; ++index)
+        this.children.splice(index, 1);
+        if (this.children.length > index) for (; index < this.children.length; ++index)
             this.children[index].changeIndex();
     }
 
     removeChildByIndex(index) {
-        this.children.splice(index,1);
-        if(this.children.length > index)for(;index < this.children.length; ++index)
+        this.children.splice(index, 1);
+        if (this.children.length > index) for (; index < this.children.length; ++index)
             this.children[index].changeIndex();
     }
 
@@ -498,13 +498,13 @@ class COMRectangleElement extends COMElement {
     }
 
     draw(ctx) {
-        if(this.width == 0 || this.height == 0)return;
-        if(this.color != "transparent"){
+        if (this.width == 0 || this.height == 0) return;
+        if (this.color != "transparent") {
             ctx.rect(-this.originX, -this.originY, this.width, this.height);
             ctx.fillStyle = this.color;
             ctx.fill();
         }
-        if(this.image?this.image.complete:false){
+        if (this.image ? this.image.complete : false) {
             ctx.drawImage(this.image, -this.originX, -this.originY, this.width, this.height);
         }
     }
@@ -538,23 +538,23 @@ class MultiDimensionRangeArray {
         this.setDefault = value => defaultReturn = value;
 
         this.createRange = (rangesArray, value) => {
-            ranges.push({range: rangesArray, value});
+            ranges.push({ range: rangesArray, value });
         }
 
         this.getBy = indexes => {
-            for(let i = ranges.length-1; i > -1; i--){
+            for (let i = ranges.length - 1; i > -1; i--) {
                 let finded = true;
                 ranges[i].range.forEach((range, i) => {
-                    if(range.from > indexes[i] || range.to <= indexes[i])finded = false;
+                    if (range.from > indexes[i] || range.to <= indexes[i]) finded = false;
                 });
-                if(finded)return ranges[i].value;
+                if (finded) return ranges[i].value;
             }
             return defaultReturn;
         }
 
         this.clearRanges = () => ranges = new Array;
 
-        Object.defineProperty(this,"ranges",{get:()=>ranges});
+        Object.defineProperty(this, "ranges", { get: () => ranges });
     }
 }
 
@@ -570,25 +570,25 @@ class COMTiledMapElement extends COMElement {
 
             defaultTile: {
                 set: src => {
-                    let image = new Image();
-                    image.src = src;
-                    tileStorage.setDefault(image);
+                    if (src != "transparent") {
+                        let image = new Image();
+                        image.src = src;
+                        tileStorage.setDefault(image);
+                    } else tileStorage.setDefault("transparent");
                 }
             },
             rangeTile: {
                 set: range => { //{fromX,toX,fromY,toY, src}
-                    let image = new Image();
-                    image.src = range.src;
-                    tileStorage.createRange([{ from: range.fromX, to: range.toX }, { from: range.fromY, to: range.toY }], image);
+                    if (range.src != "transparent") {
+                        let image = new Image();
+                        image.src = range.src;
+                        tileStorage.createRange([{ from: range.fromX, to: range.toX }, { from: range.fromY, to: range.toY }], image);
+                    } else tileStorage.createRange([{ from: range.fromX, to: range.toX }, { from: range.fromY, to: range.toY }], "transparent");
                 }
             },
             rangeTiles: {
                 set: ranges => { //[{fromX,toX,fromY,toY, src}...
-                    ranges.forEach(range => {
-                        let image = new Image();
-                        image.src = range.src;
-                        tileStorage.createRange([{ from: range.fromX, to: range.toX }, { from: range.fromY, to: range.toY }], image);
-                    });
+                    ranges.forEach(range => this.rangeTile = range);
                 }
             },
             tileStorage: { get: () => tileStorage },
@@ -624,7 +624,7 @@ class COMTiledMapElement extends COMElement {
         let end = { ix: Math.ceil((-this.x + document.body.offsetWidth) / this.tileSize.width), iy: Math.ceil((-this.y + document.body.offsetHeight) / this.tileSize.width) };
         for (let iy = start.iy; iy < end.iy; iy++)
             for (let ix = start.ix; ix < end.ix; ix++)
-                ctx.drawImage(this.tileStorage.getBy([ix, iy]), this.tileWidth * ix, this.tileHeight * iy, this.tileWidth, this.tileHeight);
+                if (this.tileStorage.getBy([ix, iy]) != "transparent") ctx.drawImage(this.tileStorage.getBy([ix, iy]), this.tileWidth * ix, this.tileHeight * iy, this.tileWidth, this.tileHeight);
     }
 }
 

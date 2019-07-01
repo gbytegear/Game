@@ -620,7 +620,7 @@
             mainController.canvas.insert(this.player.rootElement);
             mainController.canvas.insert(this.map.foregroundDecorations);
 
-            this.map.loadMapByName('home');
+            this.map.loadMapByName('spaceship');
 
             this.mainLoop.insertFunction(()=>this.createObjectsFromStack());
             this.mainLoop.insertFunction(()=>this.movement());

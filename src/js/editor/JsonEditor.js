@@ -105,6 +105,11 @@ customElements.define('json-cell', class extends HTMLElement {
         }
     }
 
+    delete(){
+        delete this.parent.ptr[this.name];
+        this.remove();
+    }
+
     connectedCallback() { }
 })
 
@@ -163,7 +168,7 @@ customElements.define('json-editor', class extends HTMLElement {
 customElements.define('json-context', class extends HTMLElement {
     constructor() {
         super();
-        this.options = ['Change value', 'Change type', 'Change name'];
+        this.options = ['Change value', 'Change type', 'Change name', 'delete'];
         this.selected = null;
         this.pos = [0, 0]
     }
@@ -182,7 +187,11 @@ customElements.define('json-context', class extends HTMLElement {
 
     execute(name) {
         if (/Change/.test(name))
-            this.selected.change(name.replace('Change ', ""));
+            return this.selected.change(name.replace('Change ', ""));
+        switch(name){
+            case 'delete':
+                this.selected.delete();
+        }
     }
 
     connectedCallback() {

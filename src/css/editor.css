@@ -5,7 +5,7 @@ html, body {
 body {
     width: 100vw;
     height: 100vh;
-    background-color: #7d7d7d;
+    background: center/cover url(../img/textures/space.png),radial-gradient(#374a7d , black);
     margin: 0;
 }
 
@@ -27,9 +27,23 @@ canvas {
 
 json-editor{
     position: fixed;
-    right: 0;
+    right: calc(-100vw + 10px);
     top: 0;
-    width: 25vw;
+    width: 100vw;
     height: calc(100vh - 2em);
     white-space: nowrap;
+    transition: right 1s;
+}
+
+.json json-editor{
+    right: 0;
+}
+
+dev-info{
+    left: 0;
+    transition: left 1s;
+}
+
+.json dev-info{
+    left: -100vw;
 }

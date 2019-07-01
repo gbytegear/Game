@@ -5,7 +5,7 @@ html, body {
 body {
     width: 100vw;
     height: 100vh;
-    background-color: #7d7d7d;
+    background: center/cover url(../img/textures/space.png),radial-gradient(#374a7d , black);
     margin: 0;
 }
 
@@ -40,7 +40,7 @@ canvas {
     position: fixed;
     left: 0;
     top: 0;
-    background: #000d;
+    background: #060917dd;
     visibility: hidden;
     opacity: 0;
     transition: opacity 1s;
