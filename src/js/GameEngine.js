@@ -627,9 +627,15 @@
             this.mainLoop.insertFunction(()=>mainController.canvas.rerender());
             this.mainLoop.block = false;
 
-            this.moveTo = {x:0, y:0};
+            this.controllerButtons = {
+                up: false,
+                right: false,
+                down: false,
+                left: false,
+                shift: false
+            };
 
-            this.intiControllEvents();
+            this.moveTo = {x:0, y:0};
         }
 
         createObjectsFromStack() {
@@ -664,8 +670,6 @@
             
             if(this.moveTo.x != 0 || this.moveTo.y != 0)
                 (addX = this.moveTo.x, addY = this.moveTo.y)
-
-            // if(addX == 0 && addY == 0)return;
             
             if (!this.map.hitSolid({
                 x: this.player.position.x + addX - 20,
@@ -692,76 +696,6 @@
 
             this.map.changePosition(this.player.position);
             this.player.rootElement.angle = this.player.angle;
-
-        }
-
-        intiControllEvents() {
-            this.controllerButtons = {
-                up: false,
-                right: false,
-                down: false,
-                left: false,
-                shift: false
-            };
-
-            document.addEventListener('keydown', e=>{
-                if (e.keyCode === 38 /* up */
-                || e.keyCode === 87 /* w */
-                || e.keyCode === 38)
-                    this.controllerButtons.up = true;
-                if (e.keyCode === 39 /* right */
-                || e.keyCode === 68 /* d */
-                || e.keyCode === 39)
-                    this.controllerButtons.right = true;
-                if (e.keyCode === 40 /* down */
-                || e.keyCode === 83 /* s */
-                || e.keyCode === 40)
-                    this.controllerButtons.down = true;
-                if (e.keyCode === 37 /* left */
-                || e.keyCode === 65 /* a */
-                || e.keyCode === 37)
-                    this.controllerButtons.left = true;
-                if (e.keyCode === 16)
-                    this.controllerButtons.shift = true;
-
-                if (e.keyCode === 27) {
-                    let ui = document.querySelector('.menu');
-                    window.running = ui.classList.contains('show');
-                    (ui.classList.contains('show')) ? (ui.classList.remove('show'),
-                    this.mainLoop.block = false) : (ui.classList.add('show'),
-                    this.mainLoop.block = true);
-                }
-            }
-            );
-
-            document.addEventListener('keyup', e=>{
-                if (e.keyCode === 38 /* up */
-                || e.keyCode === 87 /* w */
-                || e.keyCode === 38)
-                    this.controllerButtons.up = false;
-                if (e.keyCode === 39 /* right */
-                || e.keyCode === 68 /* d */
-                || e.keyCode === 39)
-                    this.controllerButtons.right = false;
-                if (e.keyCode === 40 /* down */
-                || e.keyCode === 83 /* s */
-                || e.keyCode === 40)
-                    this.controllerButtons.down = false;
-                if (e.keyCode === 37 /* left */
-                || e.keyCode === 65 /* a */
-                || e.keyCode === 37)
-                    this.controllerButtons.left = false;
-                if (e.keyCode === 16)
-                    this.controllerButtons.shift = false;
-            }
-            );
-
-            document.addEventListener('mousemove', e=>{
-                this.player.angle = -(180 / Math.PI * Math.atan2(this.player.rootElement.x + this.player.rootElement.width / 2 - e.clientX, this.player.rootElement.y + this.player.rootElement.height / 2 - e.clientY));
-            }
-            );
-
-            document.addEventListener('mousedown', e=>this.shoot(e.clientX, e.clientY));
         }
 
 

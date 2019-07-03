@@ -28,6 +28,7 @@
             right: 10px;"
             onout="this.style.filter = 'invert(100%)'"
             onin="this.style.filter = ''"></gm-joystick>
+        <div style="position: fixed; top: 0; right: 0;font-size: 5em;" onclick="document.documentElement.requestFullscreen()">FS</div>
     </div>
     <div class="menu">
         <div class="header">
@@ -36,7 +37,6 @@
             <div class="tab" data-button="settings">Настройки</div>
         </div>
         <div class="content">
-
         </div>
     </div>
     <script src="./src/js/CanvasObjectModel.js"></script>
@@ -44,6 +44,7 @@
     <script src="./src/js/ui.js"></script>
     <script>
             GameEngine = new GameEngine();
-        </script>
+            document.addEventListener('dblclick', ()=> document.documentElement.requestFullscreen());
+    </script>
 </body>
 </html>
