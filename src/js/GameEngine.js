@@ -604,7 +604,7 @@
 
 
     // --------------------------------------------------------------------------------------------------------------------------------------------------------------------
-    window.GameEngine = new class GameEngine {
+    window.GameEngine = class GameEngine {
         constructor() {
             this.ObjectList = new Array;
             this.Inventory = Inventory;
@@ -627,13 +627,8 @@
             this.mainLoop.insertFunction(()=>mainController.canvas.rerender());
             this.mainLoop.block = false;
 
-            this.controllerButtons = {
-                up: false,
-                right: false,
-                down: false,
-                left: false,
-                shift: false
-            };
+            this.moveTo = {x:0, y:0};
+
             this.intiControllEvents();
         }
 
@@ -655,9 +650,7 @@
         }
 
         movement() {
-            let addX = 0
-              , addY = 0
-              , speed = this.player.walkingSpeed;
+            let addX = 0, addY = 0, speed = this.player.walkingSpeed;
             if (this.controllerButtons.shift)
                 speed += this.player.runningSpeed;
             if (this.controllerButtons.up)
@@ -668,7 +661,12 @@
                 addY += speed;
             if (this.controllerButtons.left)
                 addX -= speed;
+            
+            if(this.moveTo.x != 0 || this.moveTo.y != 0)
+                (addX = this.moveTo.x, addY = this.moveTo.y)
 
+            // if(addX == 0 && addY == 0)return;
+            
             if (!this.map.hitSolid({
                 x: this.player.position.x + addX - 20,
                 y: this.player.position.y - 20,
@@ -698,6 +696,14 @@
         }
 
         intiControllEvents() {
+            this.controllerButtons = {
+                up: false,
+                right: false,
+                down: false,
+                left: false,
+                shift: false
+            };
+
             document.addEventListener('keydown', e=>{
                 if (e.keyCode === 38 /* up */
                 || e.keyCode === 87 /* w */
@@ -755,12 +761,16 @@
             }
             );
 
-            document.addEventListener('mousedown', e=>{
-                if (this.mainLoop.block || !this.player.stats.armed)
+            document.addEventListener('mousedown', e=>this.shoot(e.clientX, e.clientY));
+        }
+
+
+        shoot(x, y){
+            if (this.mainLoop.block || !this.player.stats.armed)
                     return;
                 let mouse = {
-                    x: e.clientX - document.body.offsetWidth / 2,
-                    y: e.clientY - document.body.offsetHeight / 2
+                    x: x - document.body.offsetWidth / 2,
+                    y: y - document.body.offsetHeight / 2
                 }
                   , sx = Math.abs(mouse.x) / ((Math.abs(mouse.x) + Math.abs(mouse.y)) / 100)
                   , sy = Math.abs(mouse.y) / ((Math.abs(mouse.x) + Math.abs(mouse.y)) / 100);
@@ -785,18 +795,16 @@
                         x: sx,
                         y: sy,
                         fx: `()=>{
-            if(this.currentStep==this.deleteStep)this.remove();
-            this.currentStep++
-            }`
+                            if(this.currentStep==this.deleteStep)this.remove();
+                            this.currentStep++
+                        }`
                     }
                 });
 
                 this.creationStack.push({
-                    to: "background",
+                    to: "foreground",
                     object: bullet
                 });
-            }
-            );
         }
 
     }
