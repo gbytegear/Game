@@ -2,6 +2,9 @@ const ge = new class GameEngine {
     constructor() {
         this.map = new MapController;
         this.buildGameSceneStructure();
+        // TEST
+        this.player.setTextures(data.items.clth_empty);
+        this.player.setTextures(data.heads.player);
     }
 
     buildGameSceneStructure () {
@@ -12,5 +15,6 @@ const ge = new class GameEngine {
             'character.player',
             'map_object_layer.foreground_layer'];
         canvas.query('player').anchors = {position: 'center'};
+        this.player = canvas.query('player');
     }
 }

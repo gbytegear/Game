@@ -599,6 +599,7 @@ class COMRectangleElement extends COMElement {
             src: {
                 get: () => src,
                 set: newSrc => {
+                    if(!newSrc)texture = null;
                     let image = new Image;
                     src = newSrc;
                     image.src = src;
