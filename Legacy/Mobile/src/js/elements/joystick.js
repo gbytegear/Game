@@ -1,7 +1,7 @@
 customElements.define('gm-joystick', class extends HTMLElement {
     constructor() {
         super();
-        let touchPointStart;
+        let touchPointStart, touchIndex;
         this.handle = document.createElement('div');
         this.handle.className = "handle";
         this.percent = 0;
@@ -11,11 +11,12 @@ customElements.define('gm-joystick', class extends HTMLElement {
         this.onmove = function(){};
 
         this.addEventListener("touchstart", e => {
-            touchPointStart = { x: e.touches[0].clientX - this.offsetLeft - this.offsetWidth / 2, y: e.touches[0].clientY - this.offsetTop - this.offsetHeight / 2 };
+            touchIndex = e.touches.length - 1;
+            touchPointStart = { x: e.touches[touchIndex].clientX - this.offsetLeft - this.offsetWidth / 2, y: e.touches[touchIndex].clientY - this.offsetTop - this.offsetHeight / 2 };
             value.touched = true;
         });
         this.addEventListener("touchmove", e => {
-            let touchPointCurrent = { x: e.touches[0].clientX - this.offsetLeft - this.offsetWidth / 2, y: e.touches[0].clientY - this.offsetTop - this.offsetHeight / 2 },
+            let touchPointCurrent = { x: e.touches[touchIndex].clientX - this.offsetLeft - this.offsetWidth / 2, y: e.touches[touchIndex].clientY - this.offsetTop - this.offsetHeight / 2 },
                 outOfBounds = !(Math.pow(touchPointCurrent.x - touchPointStart.x, 2) + Math.pow(touchPointCurrent.y - touchPointStart.y, 2) <
                     (this.offsetWidth / 2 - this.handle.offsetWidth / 2) * (this.offsetHeight / 2 - this.handle.offsetHeight / 2));
             value.angle = Math.atan2(touchPointCurrent.y - touchPointStart.y, touchPointCurrent.x - touchPointStart.x);

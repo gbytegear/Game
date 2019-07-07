@@ -1,6 +1,5 @@
-"use strict"
 /* //Содержание по классам
- * Loop Controller
+ * MainController / Body
  * Canvas JSON Object Model (COM)
  * COM Canavas
  * COM Item Element - PROTOTYPE OF ALL COM ELEMENTS
@@ -13,33 +12,31 @@
  * 
  */
 
-// ---------------------------------------------------------------------------------- LoopController
-class LoopController {
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// ---------------------------------------------------------------------------------- MainController / Body
+customElements.define('main-controller', class MainController extends HTMLBodyElement {
     constructor() {
-        let functionStack = new Array
-            , block = true
-            , loop = () => ((!block) ? (functionStack.forEach(func => func())) : undefined,
-                window.requestAnimationFrame(loop));
-        window.requestAnimationFrame(loop);
-
-        this.insertFunction = (func) => {
-            functionStack.push(func);
-            return functionStack.length - 1;
-        };
-        this.removeFunctionByIndex = (index) => {
-            functionStack.splice(index, 1);
-        };
-
-        this.executeNow = () => functionStack.forEach(func => func());
-
-        Object.defineProperties(this, {
-            block: {
-                set: value => block = value,
-                get: () => block
-            }
-        });
+        super();
+        window.mainController = this;
     }
-};
+}, { extends: "body" });
+
 
 
 
@@ -60,6 +57,8 @@ class LoopController {
 
 
 // ---------------------------------------------------------------------------------- Canvas JSON Object Model
+
+
 class CanvasObjectModel extends Array {
     constructor(canvas) {
         super();
@@ -68,63 +67,28 @@ class CanvasObjectModel extends Array {
 
     static defineObject(name, prototype) {
         CanvasObjectModel.prototype.typeList[name] = prototype;
-        prototype.type = name;
     }
 
     static defineObjects(objects) {
         for (let name in objects)
-            this.defineObject(name, objects[name]);
+            CanvasObjectModel.prototype.typeList[name] = objects[name];
     }
 
-    static createElement(type, properties = {}) {
-        if (!this.prototype.typeList[type]) return console.error(`Element with name "${type}" isn't exist!`);
-        return new this.prototype.typeList[type](properties);
-    }
+    createElement(name, properties = {}) { return new this.typeList[name](properties); }
 
-    static defineTemplate(name, json) {
-        this.prototype.templates[name] = json;
-    }
+    static createElement(name, properties = {}) { return new CanvasObjectModel.prototype.typeList[name](properties); }
 
-    static createElementByTemplate(template) {
-        let element = this.createElement(this.prototype.templates[template].type, this.prototype.templates[template].properties);
-        if (this.prototype.templates[template].childs) this.parse(this.prototype.templates[template].childs, element);
-        return element;
-    }
-
-    static parse(json, parent) {
-        json = (typeof (json) == 'string') ? JSON.parse(json) : json;
-        const wallker = (json, parent) => {
-            let element = null;
-            if (typeof (json) == "string") {
-                json = json.split('.');
-                element = this.createElementByTemplate(json[0]);
-                element.name = json[1];
-            } else element = this.createElement(json.type, json.properties);
-            if (json.childs)
-                json.childs.forEach(json => wallker(json, element));
-            parent.insert(element);
+    parse(json) {
+        const elementWallker = (elementList, answerList = new Array) => {
+            elementList.forEach(element => {
+                let newElement = new this.typeList[element.type](element.properties);
+                // if(element.childs)
+            });
         }
-        json.forEach(json => wallker(json, parent));
-        return parent;
     }
-
-    static query(path, searchIn = canvas) {
-        let selectPath = path.split('/');
-        let container = searchIn.children;
-        for (let i = 0; i < container.length; i++)
-            if (container[i].name == selectPath[0]) {
-                selectPath.splice(0, 1);
-                if (selectPath.length == 0) return container[i];
-                container = container[i].children;
-                i = -1;
-            }
-        return null;
-    }
-
 };
 
 CanvasObjectModel.prototype.typeList = new Object;
-CanvasObjectModel.prototype.templates = new Object;
 
 
 
@@ -154,46 +118,33 @@ customElements.define('com-canvas', class extends HTMLCanvasElement {
 
         this.context = this.getContext('2d');
         this.ObjectModel = new CanvasObjectModel(this);
+
+        this.renderBlock = false;
+
         this.width = document.body.offsetWidth;
         this.height = document.body.offsetHeight;
-        this.loop = new LoopController;
         document.body.onresize = () => {
             this.width = document.body.offsetWidth;
             this.height = document.body.offsetHeight;
         };
 
-
-        this.loop.insertFunction(() => this.rerender());
-        Object.defineProperties(this, {
-            children: { get: () => this.ObjectModel },
-            innerJSON: {
-                set: json => CanvasObjectModel.parse(json, this),
-                get: () => {
-                    let json = new Array;
-                    this.children.forEach(child => {
-                        json.push(child.outerJSON);
-                    });
-                    return json;
-                }
-            }
-        });
+        Object.defineProperty(this, "children", { get: () => this.ObjectModel });
     }
-
-    query(path){return CanvasObjectModel.query(path, this)}
 
     insert(element) {
         this.ObjectModel.push(element);
-        element.inserted(this);
-        return element;
+        element.changeParent(this);
+        this.rerender();
     }
 
     connectedCallback() {
-        if (document.canvas) return this.remove();
-        window.canvas = this;
-        this.loop.block = false;
+        if (mainController.canvas) return this.remove();
+        mainController.canvas = this;
     }
 
     rerender() {
+        if (this.renderBlock) return;
+
         this.context.resetTransform();
         this.context.clearRect(0, 0, this.width, this.height);
         this.context.beginPath();
@@ -208,12 +159,7 @@ customElements.define('com-canvas', class extends HTMLCanvasElement {
         this.context.closePath();
     }
 
-    removeChild(element) {
-        let index = this.ObjectModel.indexOf(element);
-        this.ObjectModel.splice(index, 1);
-        if (this.ObjectModel.length > index) for (; index < this.children.length; ++index)
-            this.ObjectModel[index].changeIndex();
-    } //TODO
+    removeChild(element) { } //TODO
 }, { extends: "canvas" });
 
 
@@ -242,14 +188,17 @@ class COMElement {
         let index = null, parent = null,
             x = 0, y = 0,
             width = 0, height = 0,
+
             visible = "true",
-            origin_point = { x: 0, y: 0 }, angle = 0,
+
+            originPoint = { x: 0, y: 0 }, angle = 0,
+
             anchors = new Object,
+
+            renderBlock = false,
             shadowProperties = null,
-            renderFunction = () => { },
-            insertFunction = () => { };
+            dynamicProperties = new Object;
         this.children = new Array;
-        this.name = '';
 
 
 
@@ -269,8 +218,8 @@ class COMElement {
         }
 
         this.relativeProcessing = () => {
-            if (anchors.size && parent) switch (anchors.size) {
-                    case "fill":
+            if (anchors.size || parent) switch (anchors.size) {
+                case "fill":
                     width = parent.width; height = parent.height;
                     break; case "fill_width":
                     width = parent.width;
@@ -278,11 +227,8 @@ class COMElement {
                     height = parent.height;
             };
 
-            if(anchors.offsetWidth) width += anchors.offsetWidth;
-            if(anchors.offsetHeight) height += anchors.offsetHeight;
-
-            if (anchors.position && parent) switch (anchors.position) {
-                    case "left_top":
+            if (anchors.position || parent) switch (anchors.position) {
+                case "left_top":
                     x = 0; y = 0;
                     break; case "right_top":
                     x = parent.width - width; y = 0;
@@ -293,16 +239,15 @@ class COMElement {
                     break; case "center":
                     x = parent.width / 2 - width / 2; y = parent.height / 2 - height / 2;
             };
-
-            if(anchors.offsetX) x += anchors.offsetX;
-            if(anchors.offsetY) y += anchors.offsetY;
-
-            if(anchors.origin) switch (anchors.origin) {
-                case "center":
-
-            };
-            if(anchors.disposable)anchors = new Object;
         }
+
+        this.dynamicProcessing = () => {
+            if (dynamicProperties.x) x += dynamicProperties.x;
+            if (dynamicProperties.y) y += dynamicProperties.y;
+            if (dynamicProperties.width) width += dynamicProperties.width;
+            if (dynamicProperties.height) height += dynamicProperties.height;
+            if (dynamicProperties.fx) dynamicProperties.fx();
+        };
 
 
 
@@ -310,11 +255,6 @@ class COMElement {
 
         // СВОЙСТВА
         Object.defineProperties(this, {
-            changeIndex: { enumerable: false },
-            changeParent: { enumerable: false },
-            relativeProcessing: { enumerable: false },
-            children: { enumerable: false },
-
             //Position
             x: {
                 set: newX => x = newX,
@@ -366,27 +306,28 @@ class COMElement {
             index: {
                 get: () => index
             },
+            renderBlock: { get: () => renderBlock, set: value => renderBlock = value },
 
             // Transform Origin
             originX: {
-                get: () => origin_point.x,
-                set: newOriginX => origin_point.x = newOriginX
+                get: () => originPoint.x,
+                set: newOriginX => originPoint.x = newOriginX
             },
             originY: {
-                get: () => origin_point.y,
-                set: newOriginY => origin_point.y = newOriginY
+                get: () => originPoint.y,
+                set: newOriginY => originPoint.y = newOriginY
             },
             origin: {
-                get: () => origin_point,
+                get: () => originPoint,
                 set: newOrigin => {
                     if (typeof (newOrigin) == "string") return (() => {
                         if (newOrigin == 'center') {
-                            origin_point.x = this.width / 2;
-                            origin_point.y = this.height / 2;
+                            originPoint.x = this.width / 2;
+                            originPoint.y = this.height / 2;
                         }
                     })();
-                    origin_point.x = newOrigin[0];
-                    origin_point.y = newOrigin[1];
+                    originPoint.x = newOrigin[0];
+                    originPoint.y = newOrigin[1];
                 }
             },
 
@@ -415,55 +356,12 @@ class COMElement {
                 set: newAnchors => anchors = newAnchors
             },
 
-            // Stage Functions
-            onrender: {
-                get: () => renderFunction,
-                set: newRenderFunction =>
-                    (typeof (newRenderFunction) == "function")
-                        ? renderFunction = newRenderFunction
-                        : (typeof (newRenderFunction) == "string")
-                            ? renderFunction = eval(newRenderFunction)
-                            : undefined
-            },
-            oninsert: {
-                get: () => insertFunction,
-                set: newInsertFunction =>
-                    (typeof (newInsertFunction) == "function")
-                        ? insertFunction = newInsertFunction
-                        : (typeof (newInsertFunction) == "string")
-                            ? insertFunction = eval(newInsertFunction)
-                            : undefined
-            },
-
-            //JSON
-            innerJSON: {
-                set: json => CanvasObjectModel.parse(json, this),
-                get: () => {
-                    let json = new Array;
-                    this.children.forEach(child => {
-                        json.push(child.outerJSON);
-                    });
-                    return json;
-                }
-            },
-
-            outerJSON: {
-                get: () => {
-                    let json = new Object;
-                    json.type = this.constructor.type;
-                    json.properties = {
-                        position: this.position,
-                        size: this.size,
-                        visible: this.visible,
-                        origin: this.origin,
-                        angle: this.angle,
-                        anchors: this.anchors,
-                        onrender: this.onrender.toString(),
-                        oninsert: this.onrender.toString()
-                    }
-                    for (let prop in this) json.properties[prop] = this[prop];
-                    json.childs = this.innerJSON;
-                    return json;
+            //Dynamic
+            dynamicProperties: {
+                get: () => dynamicProperties,
+                set: newDynamicProperties => {
+                    dynamicProperties = newDynamicProperties;
+                    if (typeof (dynamicProperties.fx) == "string") dynamicProperties.fx = eval(dynamicProperties.fx);
                 }
             }
         });
@@ -478,7 +376,7 @@ class COMElement {
     //ОТРИСОВКА
     render(ctx) {
         ctx.beginPath();
-        this.onrender(this);
+        this.dynamicProcessing();
         ctx.translate(this.x, this.y);
         ctx.translate(this.originX, this.originY);
         ctx.rotate(this.angle * Math.PI / 180);
@@ -527,21 +425,13 @@ class COMElement {
 
 
 
-    // ПОИСК/ВСТАВКА/УДАЛЕНИЕ ЭЛЕМЕНТОВ
-    query(path){return CanvasObjectModel.query(path, this)}
-
-    inserted(parent) {
-        this.oninsert(this, parent);
-        this.changeParent(parent)
-    }
-
+    // УДАЛЕНИЕ/ВСТАВКА ЭЛЕМЕНТОВ
     insert(element) {
         this.children.push(element);
-        element.inserted(this);
-        return element;
+        element.changeParent(this);
     }
 
-    removeChild(element) {
+    removeChild(element, renderBlock = false) {
         let index = this.children.indexOf(element);
         this.children.splice(index, 1);
         if (this.children.length > index) for (; index < this.children.length; ++index)
@@ -555,14 +445,10 @@ class COMElement {
     }
 
     remove() {
-        if (this.parent) this.parent.removeChild(this);
+        if (this.parent) this.parent.removeChild(this, this.renderBlock);
     }
 };
-const hitTest = (obj1, obj2) => {
-    if (obj1.x < obj2.x + obj2.width && obj1.x + obj1.width > obj2.x && obj1.y < obj2.y + obj2.height && obj1.y + obj1.height > obj2.y)
-        return true;
-    return false;
-};
+
 
 
 
@@ -675,57 +561,57 @@ class MultiDimensionRangeArray {
 class COMTiledMapElement extends COMElement {
     constructor(properties) {
         super();
-        let tile_size = { width: 0, height: 0 },
-            tile_storage = new MultiDimensionRangeArray;
+        let tileSize = { width: 0, height: 0 },
+            tileStorage = new MultiDimensionRangeArray;
 
-        this.clearTileRange = tile_storage.clearRanges;
+        this.clearTileRange = tileStorage.clearRanges;
 
         Object.defineProperties(this, {
 
-            default_tile: {
+            defaultTile: {
                 set: src => {
                     if (src != "transparent") {
                         let image = new Image();
                         image.src = src;
-                        tile_storage.setDefault(image);
-                    } else tile_storage.setDefault("transparent");
+                        tileStorage.setDefault(image);
+                    } else tileStorage.setDefault("transparent");
                 }
             },
-            range_tile: {
+            rangeTile: {
                 set: range => { //{fromX,toX,fromY,toY, src}
                     if (range.src != "transparent") {
                         let image = new Image();
                         image.src = range.src;
-                        tile_storage.createRange([{ from: range.fromX, to: range.toX }, { from: range.fromY, to: range.toY }], image);
-                    } else tile_storage.createRange([{ from: range.fromX, to: range.toX }, { from: range.fromY, to: range.toY }], "transparent");
+                        tileStorage.createRange([{ from: range.fromX, to: range.toX }, { from: range.fromY, to: range.toY }], image);
+                    } else tileStorage.createRange([{ from: range.fromX, to: range.toX }, { from: range.fromY, to: range.toY }], "transparent");
                 }
             },
-            range_tiles: {
+            rangeTiles: {
                 set: ranges => { //[{fromX,toX,fromY,toY, src}...
-                    ranges.forEach(range => this.range_tile = range);
+                    ranges.forEach(range => this.rangeTile = range);
                 }
             },
-            tile_storage: { get: () => tile_storage },
+            tileStorage: { get: () => tileStorage },
 
 
 
-            tile_width: {
-                get: () => tile_size.width,
-                set: new_tile_width => {
-                    tile_size.width = new_tile_width;
+            tileWidth: {
+                get: () => tileSize.width,
+                set: newTileWidth => {
+                    tileSize.width = newTileWidth;
                 }
             },
-            tile_height: {
-                get: () => tile_size.height,
-                set: new_tile_height => {
-                    tile_size.height = new_tile_height;
+            tileHeight: {
+                get: () => tileSize.height,
+                set: newTileHeight => {
+                    tileSize.height = newTileHeight;
                 }
             },
-            tile_size: {
-                get: () => tile_size,
-                set: new_tile_size => {
-                    tile_size.width = new_tile_size[0];
-                    tile_size.height = new_tile_size[1];
+            tileSize: {
+                get: () => tileSize,
+                set: newTileSize => {
+                    tileSize.width = newTileSize[0];
+                    tileSize.height = newTileSize[1];
                 }
             },
         });
@@ -734,11 +620,11 @@ class COMTiledMapElement extends COMElement {
     }
 
     draw(ctx) {
-        let start = { ix: Math.floor(-this.x / this.tile_size.width), iy: Math.floor(-this.y / this.tile_size.height) };
-        let end = { ix: Math.ceil((-this.x + document.body.offsetWidth) / this.tile_size.width), iy: Math.ceil((-this.y + document.body.offsetHeight) / this.tile_size.width) };
+        let start = { ix: Math.floor(-this.x / this.tileSize.width), iy: Math.floor(-this.y / this.tileSize.height) };
+        let end = { ix: Math.ceil((-this.x + document.body.offsetWidth) / this.tileSize.width), iy: Math.ceil((-this.y + document.body.offsetHeight) / this.tileSize.width) };
         for (let iy = start.iy; iy < end.iy; iy++)
             for (let ix = start.ix; ix < end.ix; ix++)
-                if (this.tile_storage.getBy([ix, iy]) != "transparent") ctx.drawImage(this.tile_storage.getBy([ix, iy]), this.tile_width * ix, this.tile_height * iy, this.tile_width, this.tile_height);
+                if (this.tileStorage.getBy([ix, iy]) != "transparent") ctx.drawImage(this.tileStorage.getBy([ix, iy]), this.tileWidth * ix, this.tileHeight * iy, this.tileWidth, this.tileHeight);
     }
 }
 
@@ -766,5 +652,5 @@ class COMTiledMapElement extends COMElement {
 CanvasObjectModel.defineObjects({
     item: COMElement,
     rectangle: COMRectangleElement,
-    tiled_map: COMTiledMapElement
+    tiledMap: COMTiledMapElement
 });

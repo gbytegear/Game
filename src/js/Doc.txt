@@ -1,0 +1,29 @@
+Основные понятия:
+COM-Элемент:
+Объект класса COMElement или унаследованного от класса COMElement, зарегестрированный в CanvasObjectModel функциями defineObject или defineObjects и отвечающий за отрисовку простых геометрических фигур в canvas
+
+Дескриптор COM-Элемента (COM-дескриптор):
+Тип, свойства и дескрипторы дочерних элементов в одном объете имеющий вид:
+{
+    type: String,
+    properties: Object,
+    childs: Array
+}
+
+Шаблонный дескриптор COM-Элемента (COM-шаблон):
+Строка ранее объявленная через функцию defineTemplate класса CanvasObjectModel и заменяющая собой дескриптор
+
++LoopController
+|-insertFunction(callback) - добавляет функцию для исполнения в цикле и возвращает её индекс
+|-removeFunctionByIndex(index) - удаляет функцию из цикла по индексу
+|-executeNow() - исполняет одну итерацию цикла вне зависимости активна ли блокировка исполнения
+|-block - свойство bool-типа отвечает за блокировку цикла исполнения функций
+
++CanvasObjectModel extends Array
+|-static defineObject(name, prototype) - регестрирует COM-элемент по прототипу с именем "name" и прототипом "prototype", который после можно создать при помощи createElement(см. createElement) (Внимание! Прототип должен быть унаследован от COMElement)
+|-static defineObjects(objects) - регестрирует COM-элемент заданные в одном списке, которые после можно создать при помощи createElement(см. createElement)
+|-static createElement(type, properties = {}) - создаёт COM-элемент с ранее объявленым типом "type" (см. defineObject/defineObjects) для добавления в корневой элемент canvas или в другой элемент через функцию insert
+|-static defineTemplate(name, json) - создаёт шаблон COM-элемента с помощью которого можно быстро создать объект лишний раз не объявляя его свойства
+|-static createElementByTemplate(template) - создаёт COM-элемент по ранее заданному шаблону(см. defineTemplate)
+|-static parse(json, parent) - принимает массив COM-дескрипторов(в том числе и шаблонных) в параметре "json" создаёт на их основе COM-элементы и втсавляет дочерними элементами в COM-элемент переданный аргументом "parent"
+|-select(path) - возвращает элемент с помощью имён или индексов записанных через слэш "/" пример: "name1/0/1/name2"

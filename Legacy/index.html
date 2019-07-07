@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=0.5, user-scalable=0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <link rel="stylesheet" href="./src/css/style.css">
+    <script src="./src/js/data/map.js"></script>
+    <script src="./src/js/data/animation.js"></script>
+    <script src="./src/js/data/item.js"></script>
+    <title>Document</title>
+</head>
+<body is="main-controller">
+    <canvas is="com-canvas"></canvas>
+    <div class="ui"></div>
+    <div class="menu">
+        <div class="header">
+            <div class="tab" data-button="inv">Инвентарь</div>
+            <div class="tab" data-button="stat">Статус</div>
+            <div class="tab" data-button="settings">Настройки</div>
+        </div>
+        <div class="content"></div>
+    </div>
+    <script src="./src/js/CanvasObjectModel.js"></script>
+    <script src="./src/js/engine/GameEngine.js"></script>
+    <script src="./src/js/engine/InventorySystem.js"></script>
+    <script src="./src/js/ui.js"></script>
+    <script src="./src/js/engine/DesktopControlls.js"></script>
+    <script>
+        GameEngine = new GameEngine();
+    </script>
+</body>
+</html>

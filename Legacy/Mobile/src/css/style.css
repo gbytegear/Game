@@ -1,0 +1,197 @@
+html, body {
+    overflow: hidden !important;
+}
+
+body {
+    width: 100vw;
+    height: 100vh;
+    background: center/cover url(../img/textures/space.png),radial-gradient(#374a7d , black);
+    margin: 0;
+}
+
+canvas {
+    position: fixed;
+    top: 0;
+    left: 0;
+}
+
+.warning-font {
+    color: #fff;
+    animation: blur .75s ease-out infinite;
+    text-shadow: 0px 0px 5px #fff, 0px 0px 7px #fff;
+}
+
+@keyframes blur {
+    from {
+        text-shadow: 0px 0px 10px #fff, 0px 0px 10px #fff, 0px 0px 25px #fff, 0px 0px 25px #fff, 0px 0px 25px #fff, 0px 0px 25px #fff, 0px 0px 25px #fff, 0px 0px 25px #fff, 0px 0px 50px #fff, 0px 0px 50px #fff, 0px 0px 50px #7B96B8, 0px 0px 150px #7B96B8, 0px 10px 100px #7B96B8, 0px 10px 100px #7B96B8, 0px 10px 100px #7B96B8, 0px 10px 100px #7B96B8, 0px -10px 100px #7B96B8, 0px -10px 100px #7B96B8;
+    }
+}
+
+.ui{
+    width: 100vw;
+    height: 100vh;
+    position: fixed;
+    left: 0; top: 0;
+}
+
+.menu {
+    width: 100vw;
+    height: 100vh;
+    position: fixed;
+    left: 0;
+    top: 0;
+    background: #060917dd;
+    visibility: hidden;
+    opacity: 0;
+    transition: opacity 1s;
+    color: white;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.menu.show {
+    visibility: visible;
+    opacity: 1;
+}
+
+.menu>.header {
+    width: calc(100vw - 40px);
+    margin-left: 20px;
+    height: 50px;
+    position: absolute;
+    left: 0;
+    top: 0;
+    display: flex;
+    justify-content: space-around;
+}
+
+.menu>.header::after {
+    content: "";
+    display: block;
+    position: absolute;
+    top: 100%;
+    width: 0;
+    left: 50%;
+    height: 2px;
+    background-color: white;
+    transition: 1s;
+}
+
+.menu.show>.header::after {
+    width: 100%;
+    left: 0;
+}
+
+.menu>.header>* {
+    height: 100%;
+    line-height: 50px;
+    cursor: pointer;
+    user-select: none;
+    position: relative;
+}
+
+.menu>.header>*::after{
+    content: "";
+    position: absolute;
+    bottom: 5px;
+    width: 0;
+    height: 2px;
+    left: 50%;
+    background: white;
+    transition: left .5s, width .5s;
+}
+
+.menu>.header>*:hover {
+    text-shadow: 0 0 10px white;
+}
+
+.menu>.header>*:hover::after{
+    left: 0;
+    width: 100%;
+}
+
+.menu>.header>*:active {
+    text-shadow: 0 0 5px red, 0 0 10px red, 0 0 20px red;
+    color: red;
+}
+
+.menu>.header>*:active::after{
+    background: red;
+}
+
+
+
+.menu>.content{
+    width: calc(100vw - 24px);
+    height: calc(100vh - 70px);
+    position: absolute;
+    top: 60px;
+    left: 10px;
+    /* border: 2px solid white; */
+}
+
+.menu>.content>.equipment{
+    position: absolute;
+    width: 190px;
+    height: 100%;
+    /* background: #0007; */
+    outline: 2px solid white;
+}
+
+.menu>.content>.inventory{
+    position: absolute;
+    left: 200px;
+    width: calc(100% - 200px);
+    height: 100%;
+    /* background: #0007; */
+    /* outline: 2px solid white; */
+}
+
+
+
+inv-cell{
+    display: block;
+    width: 50px;
+    height: 50px;
+    outline: 2px solid white;
+    outline-offset: -2px;
+    background-size: 100%;
+}
+
+inv-cell:hover{
+    
+}
+
+inv-cell:active{
+    box-shadow: 0 0 10px 0 white;
+}
+
+inv-cell.selected{
+    box-shadow: 0 0 10px 0 red;
+    outline-color: red;
+}
+
+.menu>.content>.equipment>inv-cell{
+    position: absolute;
+    top: calc(50% - 25px);
+    left: calc(50% - 25px);
+}
+
+.menu>.content>.equipment>inv-cell[type="head"]{
+    margin-top: -60px;
+}
+
+.menu>.content>.equipment>inv-cell[type="pants"]{
+    margin-top: 60px;
+}
+
+.menu>.content>.equipment>inv-cell[type="boots"]{
+    margin-top: 120px;
+}
+
+.menu>.content>.equipment>inv-cell[type="lhand"]{
+    margin-left: -60px;
+}
+
+.menu>.content>.equipment>inv-cell[type="rhand"]{
+    margin-left: 60px;
+}

@@ -657,16 +657,6 @@
 
         movement() {
             let addX = 0, addY = 0, speed = this.player.walkingSpeed;
-            if (this.controllerButtons.shift)
-                speed += this.player.runningSpeed;
-            if (this.controllerButtons.up)
-                addY -= speed;
-            if (this.controllerButtons.right)
-                addX += speed;
-            if (this.controllerButtons.down)
-                addY += speed;
-            if (this.controllerButtons.left)
-                addX -= speed;
             
             if(this.moveTo.x != 0 || this.moveTo.y != 0)
                 (addX = this.moveTo.x, addY = this.moveTo.y)

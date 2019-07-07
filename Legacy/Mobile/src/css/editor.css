@@ -1,0 +1,49 @@
+html, body {
+    overflow: hidden !important;
+}
+
+body {
+    width: 100vw;
+    height: 100vh;
+    background: center/cover url(../img/textures/space.png),radial-gradient(#374a7d , black);
+    margin: 0;
+}
+
+canvas {
+    position: fixed;
+    top: 0;
+    left: 0;
+}
+
+#command_line{
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100vw;
+    background: #222;
+    margin: 0; border: none; outline: none;
+    font-size: 2em;
+}
+
+json-editor{
+    position: fixed;
+    right: calc(-100vw + 10px);
+    top: 0;
+    width: 100vw;
+    height: calc(100vh - 2em);
+    white-space: nowrap;
+    transition: right 1s;
+}
+
+.json json-editor{
+    right: 0;
+}
+
+dev-info{
+    left: 0;
+    transition: left 1s;
+}
+
+.json dev-info{
+    left: -100vw;
+}
