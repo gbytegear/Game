@@ -26,9 +26,16 @@ class LoopController {
             functionStack.push(func);
             return functionStack.length - 1;
         };
+
+        this.insertBackFunction = (func) => {
+            functionStack.unshift(func);
+        };
+
         this.removeFunctionByIndex = (index) => {
             functionStack.splice(index, 1);
         };
+
+        this.clear = () => functionStack = new Array;
 
         this.executeNow = () => functionStack.forEach(func => func());
 
@@ -167,7 +174,7 @@ customElements.define('com-canvas', class extends HTMLCanvasElement {
         Object.defineProperties(this, {
             children: { get: () => this.ObjectModel },
             innerJSON: {
-                set: json => CanvasObjectModel.parse(json, this),
+                set: json => (this.children.splice(0, this.children.length), CanvasObjectModel.parse(json, this)),
                 get: () => {
                     let json = new Array;
                     this.children.forEach(child => {
@@ -179,7 +186,7 @@ customElements.define('com-canvas', class extends HTMLCanvasElement {
         });
     }
 
-    query(path){return CanvasObjectModel.query(path, this)}
+    query(path) { return CanvasObjectModel.query(path, this) }
 
     insert(element) {
         this.ObjectModel.push(element);
@@ -270,7 +277,7 @@ class COMElement {
 
         this.relativeProcessing = () => {
             if (anchors.size && parent) switch (anchors.size) {
-                    case "fill":
+                case "fill":
                     width = parent.width; height = parent.height;
                     break; case "fill_width":
                     width = parent.width;
@@ -278,11 +285,12 @@ class COMElement {
                     height = parent.height;
             };
 
-            if(anchors.offsetWidth) width += anchors.offsetWidth;
-            if(anchors.offsetHeight) height += anchors.offsetHeight;
+            if (anchors.offsetSize) ([anchors.offsetWidth, anchors.offsetHeight] = [anchors.offsetSize[0], anchors.offsetSize[1]], delete anchors.offsetSize);
+            if (anchors.offsetWidth) width += anchors.offsetWidth;
+            if (anchors.offsetHeight) height += anchors.offsetHeight;
 
             if (anchors.position && parent) switch (anchors.position) {
-                    case "left_top":
+                case "left_top":
                     x = 0; y = 0;
                     break; case "right_top":
                     x = parent.width - width; y = 0;
@@ -294,14 +302,16 @@ class COMElement {
                     x = parent.width / 2 - width / 2; y = parent.height / 2 - height / 2;
             };
 
-            if(anchors.offsetX) x += anchors.offsetX;
-            if(anchors.offsetY) y += anchors.offsetY;
+            if (anchors.offsetPosition)
+                ([anchors.offsetX, anchors.offsetY] = [anchors.offsetPosition[0], anchors.offsetPosition[1]], delete anchors.offsetPosition);
+            if (anchors.offsetX) x += anchors.offsetX;
+            if (anchors.offsetY) y += anchors.offsetY;
 
-            if(anchors.origin) switch (anchors.origin) {
+            if (anchors.origin) switch (anchors.origin) {
                 case "center":
 
             };
-            if(anchors.disposable)anchors = new Object;
+            if (anchors.disposable) anchors = new Object;
         }
 
 
@@ -437,7 +447,7 @@ class COMElement {
 
             //JSON
             innerJSON: {
-                set: json => CanvasObjectModel.parse(json, this),
+                set: json => (this.children.splice(0, this.children.length), CanvasObjectModel.parse(json, this)),
                 get: () => {
                     let json = new Array;
                     this.children.forEach(child => {
@@ -528,7 +538,7 @@ class COMElement {
 
 
     // ПОИСК/ВСТАВКА/УДАЛЕНИЕ ЭЛЕМЕНТОВ
-    query(path){return CanvasObjectModel.query(path, this)}
+    query(path) { return CanvasObjectModel.query(path, this) }
 
     inserted(parent) {
         this.oninsert(this, parent);
@@ -599,7 +609,7 @@ class COMRectangleElement extends COMElement {
             src: {
                 get: () => src,
                 set: newSrc => {
-                    if(!newSrc)texture = null;
+                    if (!newSrc) texture = null;
                     let image = new Image;
                     src = newSrc;
                     image.src = src;

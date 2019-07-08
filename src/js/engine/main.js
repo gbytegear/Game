@@ -1,5 +1,6 @@
 const ge = new class GameEngine {
     constructor() {
+        this.loop = canvas.loop;
         this.map = new MapController;
         this.buildGameSceneStructure();
         // TEST
