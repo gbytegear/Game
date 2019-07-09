@@ -17,6 +17,12 @@ CanvasObjectModel.defineTemplate('character', {
                         break; case 'right_forearm': self.query('body/right_arm/forearm').src = textures.right_forearm;
                     }
             }
+
+            self.stats = {
+                hp: 1000,
+                max_hp: 1000,
+                movement_speed: 10
+            };
         }
     },
     childs: [{

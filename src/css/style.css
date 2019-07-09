@@ -5,7 +5,7 @@ html, body {
 body {
     width: 100vw;
     height: 100vh;
-    /* background: center/cover url(../img/textures/space.png),radial-gradient(#374a7d , black); */
+    background: center/cover url(../img/textures/space.png),radial-gradient(#374a7d , black);
     margin: 0;
 }
 

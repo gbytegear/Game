@@ -164,9 +164,10 @@ customElements.define('com-canvas', class extends HTMLCanvasElement {
         this.width = document.body.offsetWidth;
         this.height = document.body.offsetHeight;
         this.loop = new LoopController;
+        let zoom = 1;
         document.body.onresize = () => {
-            this.width = document.body.offsetWidth;
-            this.height = document.body.offsetHeight;
+            this.width = document.body.offsetWidth / zoom;
+            this.height = document.body.offsetHeight / zoom;
         };
 
 
@@ -181,6 +182,16 @@ customElements.define('com-canvas', class extends HTMLCanvasElement {
                         json.push(child.outerJSON);
                     });
                     return json;
+                }
+            },
+
+            zoom: {
+                get:()=>zoom,
+                set: new_zoom => {
+                    this.style.zoom = new_zoom;
+                    zoom = new_zoom;
+                    this.width = document.body.offsetWidth / zoom;
+                    this.height = document.body.offsetHeight / zoom;
                 }
             }
         });
@@ -492,6 +503,7 @@ class COMElement {
         ctx.translate(this.x, this.y);
         ctx.translate(this.originX, this.originY);
         ctx.rotate(this.angle * Math.PI / 180);
+        this.relativeProcessing();
 
         if (this.shadow) {
             ctx.shadowColor = this.shadow.color;
@@ -500,7 +512,6 @@ class COMElement {
             ctx.shadowOffsetY = this.shadow.y;
         }
 
-        this.relativeProcessing();
         if (this.visible == "true" || this.visible == "only_this") this.draw(ctx);
 
         if (this.shadow) {
@@ -703,16 +714,16 @@ class COMTiledMapElement extends COMElement {
                 }
             },
             range_tile: {
-                set: range => { //{fromX,toX,fromY,toY, src}
+                set: range => { //{from,to, src}
                     if (range.src != "transparent") {
                         let image = new Image();
                         image.src = range.src;
-                        tile_storage.createRange([{ from: range.fromX, to: range.toX }, { from: range.fromY, to: range.toY }], image);
-                    } else tile_storage.createRange([{ from: range.fromX, to: range.toX }, { from: range.fromY, to: range.toY }], "transparent");
+                        tile_storage.createRange([{ from: range.from[0], to: range.to[0] }, { from: range.from[1], to: range.to[1] }], image);
+                    } else tile_storage.createRange([{ from: range.from[0], to: range.to[0] }, { from: range.from[1], to: range.to[1] }], "transparent");
                 }
             },
             range_tiles: {
-                set: ranges => { //[{fromX,toX,fromY,toY, src}...
+                set: ranges => { //[{from,to, src}...
                     ranges.forEach(range => this.range_tile = range);
                 }
             },
@@ -745,8 +756,8 @@ class COMTiledMapElement extends COMElement {
     }
 
     draw(ctx) {
-        let start = { ix: Math.floor(-this.x / this.tile_size.width), iy: Math.floor(-this.y / this.tile_size.height) };
-        let end = { ix: Math.ceil((-this.x + document.body.offsetWidth) / this.tile_size.width), iy: Math.ceil((-this.y + document.body.offsetHeight) / this.tile_size.width) };
+        let start = { ix: Math.floor(-this.x / this.tile_size.width) - 1, iy: Math.floor(-this.y / this.tile_size.height) - 1 };
+        let end = { ix: Math.ceil((-this.x + canvas.width) / this.tile_size.width) + 1, iy: Math.ceil((-this.y + canvas.height) / this.tile_size.width) + 1 };
         for (let iy = start.iy; iy < end.iy; iy++)
             for (let ix = start.ix; ix < end.ix; ix++)
                 if (this.tile_storage.getBy([ix, iy]) != "transparent") ctx.drawImage(this.tile_storage.getBy([ix, iy]), this.tile_width * ix, this.tile_height * iy, this.tile_width, this.tile_height);

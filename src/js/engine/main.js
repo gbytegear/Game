@@ -19,3 +19,6 @@ const ge = new class GameEngine {
         this.player = canvas.query('player');
     }
 }
+
+//Test
+ge.map.load(map_example)
