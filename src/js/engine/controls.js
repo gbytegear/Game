@@ -64,8 +64,26 @@ document.addEventListener('mousemove', e => {
 
 ge.loop.insertBackFunction(() => {
     let add = [
-        ((keys.left?ge.player.stats.movement_speed:0) - (keys.right?ge.player.stats.movement_speed:0)) * (keys.shift?2:1),
-        ((keys.up?ge.player.stats.movement_speed:0) - (keys.down?ge.player.stats.movement_speed:0)) * (keys.shift?2:1)
+        ((keys.left?ge.player.stats.movement_speed:0) - (keys.right?ge.player.stats.movement_speed:0)) * (keys.shift?1.7:1),
+        ((keys.up?ge.player.stats.movement_speed:0) - (keys.down?ge.player.stats.movement_speed:0)) * (keys.shift?1.7:1)
     ];
-    ge.map.position = [ge.map.position[0] + add[0], ge.map.position[1] + add[1]];
+    ge.map.position = [
+        ge.map.position[0] + (ge.map.hitSolid({
+            x: -ge.map.position[0] - add[0] - 20,
+            y: -ge.map.position[1] - 20,
+            width: 40,
+            height: 40,
+        })
+        ?0
+        :add[0]),
+
+        ge.map.position[1] + (ge.map.hitSolid({
+            x: -ge.map.position[0] - 20,
+            y: -ge.map.position[1] - add[1] - 20,
+            width: 40,
+            height: 40,
+        })
+        ?0
+        :add[1])
+    ];
 });

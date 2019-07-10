@@ -25,6 +25,13 @@ class MapController {
         return false;
     }
 
+    hitSolid(obj){
+        if (this.solid_layer.children.length == 0)return;
+        for (let i = 0; i < this.solid_layer.children.length; i++)
+            if(MapController.hitTest(obj, this.solid_layer.children[i]))return true;
+        return false;
+    }
+
     get inited() {
         return Boolean(
             MapController.prototype.tile_layer &&

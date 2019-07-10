@@ -15,6 +15,21 @@ CanvasObjectModel.defineTemplate('character', {
                         break; case 'left_forearm': self.query('body/left_arm/forearm').src = textures.left_forearm;
                         break; case 'right_arm': self.query('body/right_arm').src = textures.right_arm;
                         break; case 'right_forearm': self.query('body/right_arm/forearm').src = textures.right_forearm;
+                        break; case 'weapon': self.query('body/right_arm/forearm/weapon').src = textures.weapon;
+                    }
+            }
+
+            self.setAnimationFarme = frame => {
+                for (let body_part in frame)
+                    switch (body_part) {
+                        case 'body': self.query('body').angle = frame.body;
+                        break; case 'head': self.query('body/head').angle = frame.head;
+                        break; case 'backpuck': self.query('body/backpuck').angle = frame.backpuck;
+                        break; case 'left_arm': self.query('body/left_arm').angle = frame.left_arm;
+                        break; case 'left_forearm': self.query('body/left_arm/forearm').angle = frame.left_forearm;
+                        break; case 'right_arm': self.query('body/right_arm').angle = frame.right_arm;
+                        break; case 'right_forearm': self.query('body/right_arm/forearm').angle = frame.right_forearm;
+                        break; case 'weapon': self.query('body/right_arm/forearm/weapon').angle = frame.weapon;
                     }
             }
 
@@ -23,6 +38,17 @@ CanvasObjectModel.defineTemplate('character', {
                 max_hp: 1000,
                 movement_speed: 10
             };
+
+            Object.defineProperties(self, {
+                body: {get: ()=>self.query('body')},
+                head: {get: ()=>self.query('body/head')},
+                backpuck: {get: ()=>self.query('body/backpuck')},
+                left_arm: {get: ()=>self.query('body/left_arm')},
+                left_forearm: {get: ()=>self.query('body/left_arm/forearm')},
+                right_arm: {get: ()=>self.query('body/right_arm')},
+                right_forearm: {get: ()=>self.query('body/right_arm/forearm')},
+                weapon: {get: ()=>self.query('body/right_arm/forearm/weapon')}
+            });
         }
     },
     childs: [{
@@ -34,7 +60,7 @@ CanvasObjectModel.defineTemplate('character', {
         },
         childs: [
 
-            //Right arm
+            //Left arm
             {
                 type: 'rectangle',
                 properties: {
@@ -50,7 +76,7 @@ CanvasObjectModel.defineTemplate('character', {
                         size: [20, 50],
                         origin: [10, 45],
                         anchors: { position: 'right_top', offsetY: -40 }
-                    },
+                    }
                 }]
             },
 
@@ -71,6 +97,16 @@ CanvasObjectModel.defineTemplate('character', {
                         origin: [10, 45],
                         anchors: { position: 'right_top', offsetY: -40 }
                     },
+                    childs: [{
+                        type: 'rectangle',
+                        properties: {
+                            name: 'weapon',
+                            size: [10, 100],
+                            origin: [5, 50],
+                            anchors: { position: 'center_top', offsetY: -50},
+                            // color: 'red'
+                        }
+                    }]
                 }]
             },
 

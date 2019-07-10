@@ -301,16 +301,26 @@ class COMElement {
             if (anchors.offsetHeight) height += anchors.offsetHeight;
 
             if (anchors.position && parent) switch (anchors.position) {
-                case "left_top":
+                    case "left_top": case "top_left":
                     x = 0; y = 0;
-                    break; case "right_top":
+                    break; case "right_top": case "top_right":
                     x = parent.width - width; y = 0;
-                    break; case "left_bottom":
+
+                    break; case "left_bottom": case "bottom_left":
                     x = 0; this.y = parent.height - height;
-                    break; case "right_bottom":
+                    break; case "right_bottom": case "bottom_right":
                     x = parent.width - width; y = parent.height - height;
+
+                    break; case "center_top": case "top_center":
+                    x = parent.width / 2 - width / 2; y = 0;
+                    break; case "center_bottom": case "bottom_center":
+                    x = parent.width / 2 - width / 2; this.y = parent.height - height;
+
                     break; case "center":
                     x = parent.width / 2 - width / 2; y = parent.height / 2 - height / 2;
+
+                    break; default:
+                    console.error(`Position anchor with name ${anchors.position} isn't exist!`)
             };
 
             if (anchors.offsetPosition)
@@ -578,11 +588,6 @@ class COMElement {
     remove() {
         if (this.parent) this.parent.removeChild(this);
     }
-};
-const hitTest = (obj1, obj2) => {
-    if (obj1.x < obj2.x + obj2.width && obj1.x + obj1.width > obj2.x && obj1.y < obj2.y + obj2.height && obj1.y + obj1.height > obj2.y)
-        return true;
-    return false;
 };
 
 
