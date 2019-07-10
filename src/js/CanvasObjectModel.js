@@ -499,11 +499,11 @@ class COMElement {
     //ОТРИСОВКА
     render(ctx) {
         ctx.beginPath();
+		this.relativeProcessing();
         this.onrender(this);
         ctx.translate(this.x, this.y);
         ctx.translate(this.originX, this.originY);
         ctx.rotate(this.angle * Math.PI / 180);
-        this.relativeProcessing();
 
         if (this.shadow) {
             ctx.shadowColor = this.shadow.color;
@@ -756,8 +756,8 @@ class COMTiledMapElement extends COMElement {
     }
 
     draw(ctx) {
-        let start = { ix: Math.floor(-this.x / this.tile_size.width) - 1, iy: Math.floor(-this.y / this.tile_size.height) - 1 };
-        let end = { ix: Math.ceil((-this.x + canvas.width) / this.tile_size.width) + 1, iy: Math.ceil((-this.y + canvas.height) / this.tile_size.width) + 1 };
+        let start = { ix: Math.floor(-this.x / this.tile_size.width), iy: Math.floor(-this.y / this.tile_size.height)};
+        let end = { ix: Math.ceil((-this.x + canvas.width) / this.tile_size.width), iy: Math.ceil((-this.y + canvas.height) / this.tile_size.width)};
         for (let iy = start.iy; iy < end.iy; iy++)
             for (let ix = start.ix; ix < end.ix; ix++)
                 if (this.tile_storage.getBy([ix, iy]) != "transparent") ctx.drawImage(this.tile_storage.getBy([ix, iy]), this.tile_width * ix, this.tile_height * iy, this.tile_width, this.tile_height);
