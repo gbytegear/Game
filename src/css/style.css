@@ -14,3 +14,23 @@ canvas {
     top: 0;
     left: 0;
 }
+
+.ui {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+}
+
+#movement_joystick {
+  position: fixed;
+  bottom: 10px;
+  left: 10px;
+}
+
+#aiming_joystick {
+  position: fixed;
+  bottom: 10px;
+  right: 10px;
+}

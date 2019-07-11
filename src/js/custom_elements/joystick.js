@@ -1,4 +1,4 @@
-<customElements.define('gm-joystick', class extends HTMLElement {
+customElements.define('gm-joystick', class extends HTMLElement {
     constructor() {
         super();
         let touchPointStart, touchIndex;
