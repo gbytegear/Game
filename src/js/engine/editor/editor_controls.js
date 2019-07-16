@@ -57,3 +57,7 @@ editor.loop.insertBackFunction(() => {
         editor.map.position[1] + ((keys.up?speed:0) - (keys.down?speed:0))
     ];
 });
+
+// document.addEventListener('mousemove', e => {
+//     ge.player.angle = -(180 / Math.PI * Math.atan2(ge.player.x + ge.player.width / 2 - e.clientX, ge.player.y + ge.player.height / 2 - e.clientY));
+// });
