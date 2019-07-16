@@ -14,18 +14,27 @@ customElements.define('gm-joystick', class extends HTMLElement {
             touchIndex = e.touches.length - 1;
             touchPointStart = { x: e.touches[touchIndex].clientX - this.offsetLeft - this.offsetWidth / 2, y: e.touches[touchIndex].clientY - this.offsetTop - this.offsetHeight / 2 };
             value.touched = true;
+            this.percent = (this.offsetWidth - this.handle.offsetWidth) / 2;
         });
         this.addEventListener("touchmove", e => {
-            let touchPointCurrent = { x: e.touches[touchIndex].clientX - this.offsetLeft - this.offsetWidth / 2, y: e.touches[touchIndex].clientY - this.offsetTop - this.offsetHeight / 2 },
+            let touchPointCurrent = { x: e.touches[touchIndex].clientX - this.offsetLeft - this.offsetWidth / 2, 
+                y: e.touches[touchIndex].clientY - this.offsetTop - this.offsetHeight / 2 },
+
                 outOfBounds = !(Math.pow(touchPointCurrent.x - touchPointStart.x, 2) + Math.pow(touchPointCurrent.y - touchPointStart.y, 2) <
                     (this.offsetWidth / 2 - this.handle.offsetWidth / 2) * (this.offsetHeight / 2 - this.handle.offsetHeight / 2));
+            
             value.angle = Math.atan2(touchPointCurrent.y - touchPointStart.y, touchPointCurrent.x - touchPointStart.x);
+            
             if (outOfBounds) touchPointCurrent = { x: Math.cos(value.angle) * (this.offsetWidth / 2 - this.handle.offsetWidth / 2), y: Math.sin(value.angle) * (this.offsetHeight / 2 - this.handle.offsetHeight / 2) };
+            
             this.handle.style.marginLeft = touchPointCurrent.x + "px";
             this.handle.style.marginTop = touchPointCurrent.y + "px";
+
             this.value.x = touchPointCurrent.x / this.percent;
             this.value.y = touchPointCurrent.y / this.percent;
             this.value.out = outOfBounds;
+            value.angle = ((value.angle * 180) / Math.PI) + 90;
+
             if(outOfBounds){this.onout()}else{this.onin()}
             this.onmove(value);
         });
@@ -57,8 +66,7 @@ customElements.define('gm-joystick', class extends HTMLElement {
     }
 
     connectedCallback() {
-        this.appendChild(this.handle)
-        this.percent = (this.offsetWidth - this.handle.offsetWidth) / 2;
+        this.appendChild(this.handle);
     }
 });
 

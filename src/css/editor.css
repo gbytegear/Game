@@ -1,0 +1,23 @@
+html, body {
+    overflow: hidden !important;
+}
+
+body {
+    width: 100vw;
+    height: 100vh;
+    background: center/cover url(../img/textures/space.png),radial-gradient(#374a7d , black);
+    margin: 0;
+}
+
+canvas {
+    position: fixed;
+    top: 0;
+    left: 0;
+}
+
+json-editor{
+    width: 600px;
+    height: 600px;
+    position: fixed;
+    right: 0;top: 0;
+}

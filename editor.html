@@ -2,21 +2,17 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=0.5, user-scalable=0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <link rel="stylesheet" href="./src/css/style.css">
+    <link rel="stylesheet" href="./src/css/editor.css">
     <title>Document</title>
 </head>
-
 <body is="main-controller">
     <canvas is="com-canvas"></canvas>
+    <json-editor path="editor.map_json"></json-editor>
     <!-- Scripts -->
     <script src="./src/js/CanvasObjectModel.js"></script>
-    <!-- Data -->
-    <script>const data = new Object;</script>
-    <script src="./src/js/data/templates.js"></script>
-    <script src="./src/js/data/animations.js"></script>
-    <script src="./src/js/data/items.js"></script>
     <!-- Game Engine -->
     <script src="./src/js/engine/map.js"></script>
-    <script src="./src/js/engine/main.js"></script>
-    <script src="./src/js/engine/desktop_controls.js"></script>
+    <script src="./src/js/engine/editor/main.js"></script>
+    <script src="./src/js/engine/editor/editor_controls.js"></script>
+    <script src="./src/js/engine/editor/JsonEditor.js"></script>
 </body>
