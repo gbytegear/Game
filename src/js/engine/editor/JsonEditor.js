@@ -143,11 +143,17 @@ customElements.define('json-editor', class extends HTMLElement {
     }
 
     load(root) {
+        this.ptr = root;
+        this.innerHTML = "";
         this.appendChild(document.createElement('json-cell').load(this.ptr, this, 'root'));
     }
 
-    connectedCallback() {
+    reload(){
         this.load(this.ptr);
+    }
+
+    connectedCallback() {
+        this.reload();
         this.addEventListener('contextmenu', e => {
             if (e.target.nodeName == "JSON-CELL")
                 this.appendChild(document.createElement('json-context').call(e.clientX - this.offsetLeft + this.scrollLeft, e.clientY - this.offsetTop + this.scrollTop, e.target));

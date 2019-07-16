@@ -15,6 +15,7 @@ const editor = new class EditorController {
                 { position: [195, 195], size: [10, 210], color: '#444' }
             ],
         };
+        this.map.load(this.map_json);
     }
 
     buildGameSceneStructure () {
