@@ -23,7 +23,9 @@ const editor = new class EditorController {
             'map_tile_layer.tile_layer', 
             'map_object_layer.background_layer', 
             'map_object_layer.solid_layer',
-            'map_object_layer.foreground_layer'];
+            'map_object_layer.foreground_layer',
+        {type: 'rectangle', properties: {name: 'selection', color:"#88a7"}}];
+        this.selection = canvas.query("selection");
     }
 }
 

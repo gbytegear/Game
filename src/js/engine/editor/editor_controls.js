@@ -4,7 +4,8 @@ const keys = {
     down: false,
     left: false,
     shift: false,
-    ctrl: false
+    ctrl: false,
+    selecting: false
 };
 
 document.addEventListener('keydown', e => {
@@ -55,6 +56,26 @@ editor.loop.insertBackFunction(() => {
     ];
 });
 
-// document.addEventListener('mousemove', e => {
-//     ge.player.angle = -(180 / Math.PI * Math.atan2(ge.player.x + ge.player.width / 2 - e.clientX, ge.player.y + ge.player.height / 2 - e.clientY));
-// });
+let inf = document.querySelector('.info')
+
+canvas.addEventListener('mousemove', e => {
+    inf.style.left = e.clientX + 40 + 'px';
+    inf.style.top = e.clientY + 'px';
+    inf.innerHTML = `
+        Mouse:(
+            x:${(e.clientX - canvas.width/2) + editor.map.position[0]};
+            y:${(e.clientY - canvas.height/2) + editor.map.position[1]})
+    `;
+    if(keys.selecting)editor.selection.size = [e.clientX - editor.selection.position[0], e.clientY - editor.selection.position[1]];
+});
+
+canvas.addEventListener('mousedown', e => {
+    keys.selecting = true;
+    editor.selection.position = [e.clientX, e.clientY];
+    editor.selection.size = [0,0]
+});
+
+canvas.addEventListener('mouseup', e => {
+    keys.selecting = false;
+    editor.selection.size = [e.clientX - editor.selection.position[0], e.clientY - editor.selection.position[1]];
+})

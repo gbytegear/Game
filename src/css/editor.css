@@ -13,6 +13,7 @@ canvas {
     position: fixed;
     top: 0;
     left: 0;
+    cursor: crosshair;
 }
 
 json-editor{
@@ -20,4 +21,14 @@ json-editor{
     height: 600px;
     position: fixed;
     right: 0;top: 0;
+}
+
+.info{
+    position: fixed;
+    top: 0;
+    left: 0;
+    color: white;
+    font-size: 25px;
+    font-family: Consolas,Menlo,Monaco,Lucida Console,Liberation Mono,DejaVu Sans Mono,Bitstream Vera Sans Mono,Courier New,monospace,sans-serif;
+    opacity: .35;
 }
