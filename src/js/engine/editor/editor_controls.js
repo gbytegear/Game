@@ -9,6 +9,7 @@ const keys = {
 };
 
 document.addEventListener('keydown', e => {
+    if(e.target != document.body)return;
     if (e.keyCode === 38 /* up */
         || e.keyCode === 87 /* w */
         || e.keyCode === 38)
@@ -56,26 +57,29 @@ editor.loop.insertBackFunction(() => {
     ];
 });
 
-let inf = document.querySelector('.info')
+let inf = document.querySelector('.info'),
+editor_settings = {
+    delta: 1,
+}
 
 canvas.addEventListener('mousemove', e => {
-    inf.style.left = e.clientX + 40 + 'px';
+    inf.style.left = e.clientX + 5 + 'px';
     inf.style.top = e.clientY + 'px';
-    inf.innerHTML = `
-        Mouse:(
-            x:${(e.clientX - canvas.width/2) + editor.map.position[0]};
-            y:${(e.clientY - canvas.height/2) + editor.map.position[1]})
+    if(keys.selecting)editor.selection.size = [(e.clientX - editor.map.position[0] - canvas.width/2) - editor.selection.position[0], (e.clientY - editor.map.position[1] - canvas.height/2) - editor.selection.position[1]];
+
+    inf.innerText = `Mouse:(x:${(e.clientX - editor.map.position[0] - canvas.width/2) }; y:${(e.clientY - editor.map.position[1] - canvas.height/2) })
+        Delta:${editor_settings.delta}
+        ${keys.selecting?`Selected:(pos:(${JSON.stringify(editor.selection.position)}); size:(${JSON.stringify(editor.selection.size)}))`:''}
     `;
-    if(keys.selecting)editor.selection.size = [e.clientX - editor.selection.position[0], e.clientY - editor.selection.position[1]];
 });
 
 canvas.addEventListener('mousedown', e => {
+    editor.selection.position = [e.clientX - editor.map.position[0] - canvas.width/2, e.clientY - editor.map.position[1] - canvas.height/2];
+    editor.selection.size = [0,0];
     keys.selecting = true;
-    editor.selection.position = [e.clientX, e.clientY];
-    editor.selection.size = [0,0]
 });
 
 canvas.addEventListener('mouseup', e => {
     keys.selecting = false;
-    editor.selection.size = [e.clientX - editor.selection.position[0], e.clientY - editor.selection.position[1]];
+    // editor.selection.size = [e.clientX - editor.selection.position[0], e.clientY - editor.selection.position[1]];
 })

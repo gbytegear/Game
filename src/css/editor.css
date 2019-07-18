@@ -18,7 +18,7 @@ canvas {
 
 json-editor{
     width: 600px;
-    height: 600px;
+    height: 400px;
     position: fixed;
     right: 0;top: 0;
 }
@@ -31,4 +31,17 @@ json-editor{
     font-size: 25px;
     font-family: Consolas,Menlo,Monaco,Lucida Console,Liberation Mono,DejaVu Sans Mono,Bitstream Vera Sans Mono,Courier New,monospace,sans-serif;
     opacity: .35;
+    pointer-events: none;
+    user-select: none;
+}
+
+.command-line{
+    width: 600px;
+    position: fixed;
+    right: 0;bottom: 0;
+    color: white;
+    background:  #202020;
+    border: none;
+    font-size: 2em;
+    font-family: Consolas,Menlo,Monaco,Lucida Console,Liberation Mono,DejaVu Sans Mono,Bitstream Vera Sans Mono,Courier New,monospace,sans-serif;
 }

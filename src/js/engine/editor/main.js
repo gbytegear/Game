@@ -24,8 +24,9 @@ const editor = new class EditorController {
             'map_object_layer.background_layer', 
             'map_object_layer.solid_layer',
             'map_object_layer.foreground_layer',
-        {type: 'rectangle', properties: {name: 'selection', color:"#88a7"}}];
-        this.selection = canvas.query("selection");
+            'map_object_layer.selection_layer'];
+        canvas.query("selection_layer").innerJSON = [{type: 'rectangle', properties: {name: 'selection', color:"#88a7"}}],
+        this.selection = canvas.query("selection_layer/selection");
     }
 }
 

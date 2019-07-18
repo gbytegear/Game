@@ -510,7 +510,7 @@ class COMElement {
     render(ctx) {
         ctx.beginPath();
 		this.relativeProcessing();
-        this.onrender(this);
+        this.onrender.call(this);
         ctx.translate(this.x, this.y);
         ctx.translate(this.originX, this.originY);
         ctx.rotate(this.angle * Math.PI / 180);
@@ -562,7 +562,7 @@ class COMElement {
     query(path) { return CanvasObjectModel.query(path, this) }
 
     inserted(parent) {
-        this.oninsert(this, parent);
+        this.oninsert.call(this, parent);
         this.changeParent(parent)
     }
 

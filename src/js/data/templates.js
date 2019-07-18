@@ -4,51 +4,53 @@ CanvasObjectModel.defineTemplate('character', {
         name: "character",
         size: [80, 50],
         origin: "center",
-        oninsert: self => {
-            self.setTextures = textures => {
+        oninsert: function() {
+
+            Object.defineProperties(this, {
+                body: {value: this.query('body'), writable: false, configurable: false},
+                head: {value: this.query('body/head'), writable: false, configurable: false},
+                backpuck: {value: this.query('body/backpuck'), writable: false, configurable: false},
+                left_arm: {value: this.query('body/left_arm'), writable: false, configurable: false},
+                left_forearm: {value: this.query('body/left_arm/forearm'), writable: false, configurable: false},
+                right_arm: {value: this.query('body/right_arm'), writable: false, configurable: false},
+                right_forearm: {value: this.query('body/right_arm/forearm'), writable: false, configurable: false},
+                weapon: {value: this.query('body/right_arm/forearm/weapon'), writable: false, configurable: false}
+            });
+
+            this.setTextures = textures => {
                 for (let texture in textures)
                     switch (texture) {
-                        case 'body': self.query('body').src = textures.body;
-                        break; case 'head': self.query('body/head').src = textures.head;
-                        break; case 'backpuck': self.query('body/backpuck').src = textures.backpuck;
-                        break; case 'left_arm': self.query('body/left_arm').src = textures.left_arm;
-                        break; case 'left_forearm': self.query('body/left_arm/forearm').src = textures.left_forearm;
-                        break; case 'right_arm': self.query('body/right_arm').src = textures.right_arm;
-                        break; case 'right_forearm': self.query('body/right_arm/forearm').src = textures.right_forearm;
-                        break; case 'weapon': self.query('body/right_arm/forearm/weapon').src = textures.weapon;
+                        case 'body': this.body.src = textures.body;
+                        break; case 'head': this.head.src = textures.head;
+                        break; case 'backpuck': this.backpuck.src = textures.backpuck;
+                        break; case 'left_arm': this.left_arm.src = textures.left_arm;
+                        break; case 'left_forearm': this.left_forearm.src = textures.left_forearm;
+                        break; case 'right_arm': this.right_arm.src = textures.right_arm;
+                        break; case 'right_forearm': this.right_forearm.src = textures.right_forearm;
+                        break; case 'weapon': this.weapon.src = textures.weapon;
                     }
             }
 
-            self.setAnimationFarme = frame => {
+            this.setAnimationFarme = frame => {
                 for (let body_part in frame)
                     switch (body_part) {
-                        case 'body': self.query('body').angle = frame.body;
-                        break; case 'head': self.query('body/head').angle = frame.head;
-                        break; case 'backpuck': self.query('body/backpuck').angle = frame.backpuck;
-                        break; case 'left_arm': self.query('body/left_arm').angle = frame.left_arm;
-                        break; case 'left_forearm': self.query('body/left_arm/forearm').angle = frame.left_forearm;
-                        break; case 'right_arm': self.query('body/right_arm').angle = frame.right_arm;
-                        break; case 'right_forearm': self.query('body/right_arm/forearm').angle = frame.right_forearm;
-                        break; case 'weapon': self.query('body/right_arm/forearm/weapon').angle = frame.weapon;
+                        case 'body': this.body.angle = frame.body;
+                        break; case 'head': this.head.angle = frame.head;
+                        break; case 'left_arm': this.left_arm.angle = frame.left_arm;
+                        break; case 'left_forearm': this.left_forearm.angle = frame.left_forearm;
+                        break; case 'right_arm': this.right_arm.angle = frame.right_arm;
+                        break; case 'right_forearm': this.right_forearm.angle = frame.right_forearm;
+                        break; case 'weapon': this.weapon.angle = frame.weapon;
                     }
             }
 
-            self.stats = {
+            this.stats = {
                 hp: 1000,
                 max_hp: 1000,
                 movement_speed: 10
             };
 
-            Object.defineProperties(self, {
-                body: {get: ()=>self.query('body')},
-                head: {get: ()=>self.query('body/head')},
-                backpuck: {get: ()=>self.query('body/backpuck')},
-                left_arm: {get: ()=>self.query('body/left_arm')},
-                left_forearm: {get: ()=>self.query('body/left_arm/forearm')},
-                right_arm: {get: ()=>self.query('body/right_arm')},
-                right_forearm: {get: ()=>self.query('body/right_arm/forearm')},
-                weapon: {get: ()=>self.query('body/right_arm/forearm/weapon')}
-            });
+            
         }
     },
     childs: [{
