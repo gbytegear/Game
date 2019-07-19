@@ -9,7 +9,9 @@
     <canvas is="com-canvas"></canvas>
     <div class="info">Hello</div>
     <json-editor path="editor.map_json"></json-editor>
-    <input type="text" class="command-line">
+    <datalist id="commands">
+    </datalist>
+    <input type="text" multiple list="commands" class="command-line">
     <!-- Scripts -->
     <script src="./src/js/CanvasObjectModel.js"></script>
     <!-- Game Engine -->
