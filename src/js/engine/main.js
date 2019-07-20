@@ -21,4 +21,4 @@ const ge = new class GameEngine {
 }
 
 //Test
-ge.map.load(map_example)
+ge.map.load(empty_map);

@@ -37,14 +37,18 @@ document.addEventListener('keyup', e => {
     if (e.keyCode === 37 || e.keyCode === 65 || e.keyCode === 37) keys.left = false;
 
     if (e.keyCode === 16)keys.shift = false;
-    if (e.keyCode === 82)editor.map.load(editor.map_json);
-    if(/Digit1/.test(e.code)){
+    if (e.keyCode === 82){
+        editor.map.load(editor.map_json);
+        document.querySelector('json-editor').reload();
+    }
+    if(/Digit/.test(e.code)){
         let index = parseInt(e.code.replace('Digit',''));
         if(keys.shift){
             localStorage.setItem('saved_map_' + index, JSON.stringify(editor.map_json));
         }else{
             editor.map_json = JSON.parse(localStorage.getItem('saved_map_' + index));
             editor.map.load(editor.map_json);
+            document.querySelector('json-editor').reload();
         }
     }
 });
@@ -76,7 +80,8 @@ canvas.addEventListener('mousemove', e => {
                 ) / (editor_settings.delta*10)) * (editor_settings.delta*10)
         ];
 
-    inf.innerText = `Mouse:{x:${(e.clientX - editor.map.position[0] - canvas.width/2) }; y:${(e.clientY - editor.map.position[1] - canvas.height/2) }}
+    inf.innerText = `Mouse:{x:${(e.clientX - editor.map.position[0] - canvas.width/2) }; y:${(e.clientY - editor.map.position[1] - canvas.height/2) }},
+        Position:{x:${editor.map.position[0]}; y:${editor.map.position[1]}}
         Delta:${editor_settings.delta}
         ${keys.selecting?`Selected:(pos:(${JSON.stringify(editor.selection.position)}); size:(${JSON.stringify(editor.selection.size)}))`:''}
     `;
@@ -148,6 +153,22 @@ const cli = new class CommandLineinterface {
                     editor.map_json.tiles.range_tiles.push(tile);
                     editor.map.load(editor.map_json);
                     document.querySelector('json-editor').reload();
+                },
+                enumerable: true,
+                writable: false
+            },
+            setDefaultTile:{
+                value: async function(src = "transparent"){
+                    editor.map_json.tiles.default_tile = src;
+                    editor.map.load(editor.map_json);
+                    document.querySelector('json-editor').reload();
+                },
+                enumerable: true,
+                writable: false
+            },
+            setPosition:{
+                value: async function(pos = [0,0]){
+                    editor.map.position = pos;
                 },
                 enumerable: true,
                 writable: false

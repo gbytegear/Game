@@ -102,15 +102,12 @@ CanvasObjectModel.defineTemplate('map_object', {
 
 
 // TEST
-const map_example = {
+const empty_map = {
     tiles: {
-        default_tile: "./src/img/tiles/grass1.jpg",
-        range_tiles: [
-            { from: [2, 2], to: [4, 4], src: 'transparent' }
-        ]
+        default_tile: "transparent",
+        range_tiles: []
     },
-    solid: [
-        { position: [195, 195], size: [210, 10], color: '#444' },
-        { position: [195, 195], size: [10, 210], color: '#444' }
-    ],
+    background: [],
+    solid: [],
+    foreground: []
 }

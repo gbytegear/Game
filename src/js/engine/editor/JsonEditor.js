@@ -105,7 +105,7 @@ customElements.define('json-cell', class extends HTMLElement {
         }
     }
 
-    delete(){
+    delete() {
         delete this.parent.ptr[this.name];
         this.remove();
     }
@@ -127,18 +127,24 @@ customElements.define('json-editor', class extends HTMLElement {
     constructor() {
         super();
         this.ptr = json;
+        this.path = null;
         this.oncontextmenu = () => false;
     }
     static get observedAttributes() {
         return ['path'];
     }
+
+    loadPointer(string) {
+        let ptr = window;
+        string.split('.').forEach(str => ptr = ptr[(isNaN(Number(str))) ? str : parseInt(str)]);
+        this.ptr = ptr;
+        this.load(ptr);
+    }
+
     attributeChangedCallback(name, oldValue, newValue) {
         switch (name) {
             case 'path':
-                let ptr = window;
-                newValue.split('.').forEach(str => ptr = ptr[(isNaN(Number(str))) ? str : parseInt(str)]);
-                this.ptr = ptr;
-                this.load(ptr);
+                this.loadPointer(newValue);
         }
     }
 
@@ -148,8 +154,8 @@ customElements.define('json-editor', class extends HTMLElement {
         this.appendChild(document.createElement('json-cell').load(this.ptr, this, 'root'));
     }
 
-    reload(){
-        this.load(this.ptr);
+    reload() {
+        this.loadPointer(this.getAttribute('path'));
     }
 
     connectedCallback() {
@@ -194,7 +200,7 @@ customElements.define('json-context', class extends HTMLElement {
     execute(name) {
         if (/Change/.test(name))
             return this.selected.change(name.replace('Change ', ""));
-        switch(name){
+        switch (name) {
             case 'delete':
                 this.selected.delete();
         }
