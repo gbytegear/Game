@@ -83,7 +83,7 @@ canvas.addEventListener('mousemove', e => {
     inf.innerText = `Mouse:{x:${(e.clientX - editor.map.position[0] - canvas.width/2) }; y:${(e.clientY - editor.map.position[1] - canvas.height/2) }},
         Position:{x:${editor.map.position[0]}; y:${editor.map.position[1]}}
         Delta:${editor_settings.delta}
-        ${keys.selecting?`Selected:(pos:(${JSON.stringify(editor.selection.position)}); size:(${JSON.stringify(editor.selection.size)}))`:''}
+        ${(editor.selection.size[0] != 0 && editor.selection.size[1] != 0)?`Selected:(pos:(${JSON.stringify(editor.selection.position)}); size:(${JSON.stringify(editor.selection.size)}))`:''}
     `;
 });
 

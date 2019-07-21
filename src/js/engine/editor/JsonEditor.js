@@ -240,7 +240,7 @@ style.textContent = `
     json-editor{
         display: block;
         position: fixed;
-        background-color: #202020;
+        background-color: #111;
         font-family: Consolas,Menlo,Monaco,Lucida Console,Liberation Mono,DejaVu Sans Mono,Bitstream Vera Sans Mono,Courier New,monospace,sans-serif;
         color: white;
         max-height: 100vh;
