@@ -63,6 +63,7 @@ document.addEventListener('mousemove', e => {
 // document.addEventListener('mousedown', e => GameEngine.shoot(e.clientX, e.clientY));
 
 ge.loop.insertBackFunction(() => {
+    if(!keys.left && !keys.up && !keys.right && !keys.down)return;
     let add = [
         ((keys.left?ge.player.stats.movement_speed:0) - (keys.right?ge.player.stats.movement_speed:0)) * (keys.shift?1.7:1),
         ((keys.up?ge.player.stats.movement_speed:0) - (keys.down?ge.player.stats.movement_speed:0)) * (keys.shift?1.7:1)

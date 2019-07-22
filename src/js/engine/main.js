@@ -6,6 +6,8 @@ const ge = new class GameEngine {
         // TEST
         this.player.setTextures(data.items.clth_empty);
         this.player.setTextures(data.heads.player);
+
+        this.map.load(data.maps[data.start_map]);
     }
 
     buildGameSceneStructure () {
@@ -19,6 +21,3 @@ const ge = new class GameEngine {
         this.player = canvas.query('player');
     }
 }
-
-//Test
-ge.map.load(empty_map);

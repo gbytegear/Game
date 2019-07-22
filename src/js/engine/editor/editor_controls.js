@@ -190,6 +190,9 @@ const cli = new class CommandLineinterface {
 
         document.querySelector('.command-line').addEventListener('keyup', e => (()=>{
             if (e.keyCode !== 13)return;
+
+            const tile_src = './src/img/tiles/';
+
             try{
                 eval(e.target.value);
                 if(!commands.containsValue(e.target.value)){
