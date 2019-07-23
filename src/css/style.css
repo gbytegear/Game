@@ -23,6 +23,21 @@ canvas {
   height: 100vh;
 }
 
+.avatar {
+  width: 120px;
+  height: 120px;
+  background: center/contain url(../img/avatars/player/standart.png) no-repeat, #2227;
+  border-color: #fff7;
+  border-style: solid;
+  border-width: 0;
+  border-right-width: 2px;
+  border-bottom-width: 2px;
+  box-shadow: 2px 2px 20px 6px black;
+}
+
+
+/*MOBILE*/
+
 #movement_joystick {
   position: fixed;
   bottom: 10px;
