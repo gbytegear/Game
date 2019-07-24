@@ -1,5 +1,6 @@
 html, body {
     overflow: hidden !important;
+    cursor: crosshair;
 }
 
 body {
@@ -32,7 +33,40 @@ canvas {
   border-width: 0;
   border-right-width: 2px;
   border-bottom-width: 2px;
-  box-shadow: 2px 2px 20px 6px black;
+}
+
+.hitbar {
+  --hp: 100%;
+  width: 500px;
+  height: 20px;
+  position: absolute;
+  left: 122px;
+  top: 0;
+  background-color: #2227;
+  border-color: #fff7;
+  border-style: solid;
+  border-width: 0;
+  border-right-width: 2px;
+  border-bottom-width: 2px;
+}
+
+.hitbar::before{
+  content: "";
+  display: block;
+  width: var(--hp);
+  height: 20px;
+  background-color: rgba(255, 0, 76, 0.5);
+}
+
+.hitbar::after{
+  content: "";
+  display: block;
+  height: 35px;
+  width: 2px;
+  position: absolute;
+  top: 0;
+  left: var(--hp);
+  background-color: #fff;
 }
 
 
