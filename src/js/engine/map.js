@@ -26,10 +26,18 @@ class MapController {
     }
 
     hitSolid(obj){
-        if (this.solid_layer.children.length == 0)return;
+        if (this.solid_layer.children.length == 0)return false;
         for (let i = 0; i < this.solid_layer.children.length; i++)
             if(MapController.hitTest(obj, this.solid_layer.children[i]))return true;
         return false;
+    }
+
+    hitAction(obj, target){
+        target = target?target:obj;
+        if (this.action_layer.length == 0)return false;
+        let actionStack = new Array;
+        this.action_layer.forEach(action => (MapController.hitTest(obj, action))?actionStack.push(action.fx):undefined);
+        return actionStack;
     }
 
     get inited() {

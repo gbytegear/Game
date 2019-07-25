@@ -1,3 +1,5 @@
+"strict mode"
+
 const keys = {
     up: false,
     right: false,
@@ -102,6 +104,14 @@ canvas.addEventListener('mouseup', e => {
         Math.round(((e.clientX - editor.map.position[0] - canvas.width/2) - editor.selection.position[0]) / (editor_settings.delta*10)) * (editor_settings.delta*10),
         Math.round(((e.clientY - editor.map.position[1] - canvas.height/2) - editor.selection.position[1]) / (editor_settings.delta*10)) * (editor_settings.delta*10)
     ];
+    if(editor.selection.width < 0){
+        editor.selection.x = editor.selection.x + editor.selection.width;
+        editor.selection.width = -editor.selection.width;
+    }
+    if(editor.selection.height < 0){
+        editor.selection.y = editor.selection.y + editor.selection.height;
+        editor.selection.height = -editor.selection.height;
+    }
 })
 
 
@@ -133,7 +143,7 @@ HTMLDataListElement.prototype.containsValue = function(value){
 const cli = new class CommandLineinterface {
     constructor(){
         Object.defineProperties(this, {
-            addObject:{
+            addObj:{
                 value: async function(to, properties = {}){
                     properties.position = editor.selection.position;
                     properties.size = editor.selection.size;
@@ -144,7 +154,7 @@ const cli = new class CommandLineinterface {
                 enumerable: true,
                 writable: false
             },
-            addTiles:{
+            addTl:{
                 value: async function(src = 'transparent'){
                     let tile = new Object;
                     tile.from = [editor.selection.position[0] / 100, editor.selection.position[1] / 100];
@@ -157,7 +167,7 @@ const cli = new class CommandLineinterface {
                 enumerable: true,
                 writable: false
             },
-            setDefaultTile:{
+            setDefTl:{
                 value: async function(src = "transparent"){
                     editor.map_json.tiles.default_tile = src;
                     editor.map.load(editor.map_json);
@@ -166,7 +176,7 @@ const cli = new class CommandLineinterface {
                 enumerable: true,
                 writable: false
             },
-            setPosition:{
+            setPos:{
                 value: async function(pos = [0,0]){
                     editor.map.position = pos;
                 },
@@ -175,6 +185,11 @@ const cli = new class CommandLineinterface {
             },
             setDelta:{
                 value: async function(delta){editor_settings.delta = delta;},
+                enumerable: true,
+                writable: false
+            },
+            addAct: {
+                value: async function(fx){},
                 enumerable: true,
                 writable: false
             }

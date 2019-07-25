@@ -110,7 +110,9 @@ customElements.define('json-cell', class extends HTMLElement {
         this.remove();
     }
 
-    connectedCallback() { }
+    connectedCallback() {
+        if(this.name != 'root')this.classList.add('hiden');
+    }
 })
 
 
@@ -164,6 +166,12 @@ customElements.define('json-editor', class extends HTMLElement {
             if (e.target.nodeName == "JSON-CELL")
                 this.appendChild(document.createElement('json-context').call(e.clientX - this.offsetLeft + this.scrollLeft, e.clientY - this.offsetTop + this.scrollTop, e.target));
         })
+        this.addEventListener('click', e => {
+            if (e.target.nodeName != "JSON-CELL") return;
+            if(e.target.classList.contains('hiden'))
+                {e.target.classList.remove('hiden')}
+                else e.target.classList.add('hiden')
+        });
     }
 })
 
@@ -252,7 +260,7 @@ style.textContent = `
         display: block;
         position: sticky;
         top: 0;
-        content: "Strictly Typed JSON Tree Editor";
+        content: attr(name);
         text-align: center;
         background-color: #404040;
         border-bottom: .2px solid white;
@@ -301,6 +309,8 @@ style.textContent = `
         background-color: #fff1;
         cursor: pointer;
     }
+
+    json-cell.hiden json-cell{display: none;}
 `;
 
 

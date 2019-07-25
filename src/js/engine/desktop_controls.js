@@ -87,4 +87,11 @@ ge.loop.insertBackFunction(() => {
         ?0
         :add[1])
     ];
+    let actionStack = ge.map.hitAction({
+        x: -ge.map.position[0] - 20,
+        y: -ge.map.position[1] - 20,
+        width: 40,
+        height: 40,
+    })
+    if(actionStack)actionStack.forEach(action => action(ge.player));
 });
