@@ -7,6 +7,20 @@ const keys = {
 };
 
 document.addEventListener('keydown', e => {
+
+    /* TODO: 
+    *
+    switch(e.keyCode){
+        case 38: case 87: ... break;
+    }
+
+    *
+    var скорость_бега = ?;
+    без шифта делить на 2
+    в андройд по всей величине джостика
+
+    */
+
     if (e.keyCode === 38 /* up */
         || e.keyCode === 87 /* w */
         || e.keyCode === 38)
@@ -62,7 +76,8 @@ document.addEventListener('mousemove', e => {
 
 // document.addEventListener('mousedown', e => GameEngine.shoot(e.clientX, e.clientY));
 
-ge.loop.insertBackFunction(() => {
+// TODO: Перегнать эту хрень в движок!!!
+ge.loop.insert(() => {
     if(!keys.left && !keys.up && !keys.right && !keys.down)return;
     let add = [
         ((keys.left?ge.player.stats.movement_speed:0) - (keys.right?ge.player.stats.movement_speed:0)) * (keys.shift?1.7:1),

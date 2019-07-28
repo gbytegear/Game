@@ -1,6 +1,6 @@
 const editor = new class EditorController {
     constructor() {
-        this.loop = canvas.loop;
+        this.loop = canvas.loop.insertBack(new ProcedureStack, this);
         this.map = new MapController;
         this.buildGameSceneStructure();
         this.map_json = {

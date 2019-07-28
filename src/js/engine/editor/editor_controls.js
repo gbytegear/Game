@@ -57,7 +57,7 @@ document.addEventListener('keyup', e => {
 
 let speed = 25;
 
-editor.loop.insertBackFunction(() => {
+editor.loop.insert(() => {
     editor.map.position = [
         editor.map.position[0] + ((keys.left?speed:0) - (keys.right?speed:0)),
         editor.map.position[1] + ((keys.up?speed:0) - (keys.down?speed:0))

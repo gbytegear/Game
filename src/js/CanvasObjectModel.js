@@ -14,40 +14,61 @@
  */
 
 // ---------------------------------------------------------------------------------- LoopController
+class ProcedureStack extends Array {
+    block = false
+
+    call(thisArg){
+        if(this.block)return;
+        this.forEach(fx => fx.fx.call((fx.thisArg)?fx.thisArg:thisArg));
+    }
+
+    insert(fx, thisArg){
+        this.push({fx, thisArg});
+        return fx;
+    }
+
+    insertBack(fx, thisArg){
+        this.unshift({fx, thisArg});
+        return fx;
+    }
+
+    remove(fx){
+        let index = this.indexOf(fx);
+        if(index < 0)return;
+        this.splice(index, 1);
+    }
+
+    clear(){this.length = 0}
+}
+
+
 class LoopController {
     constructor() {
-        let functionStack = new Array
-            , block = true
-            , loop = () => ((!block) ? (functionStack.forEach(func => func())) : undefined,
-                window.requestAnimationFrame(loop));
-        window.requestAnimationFrame(loop);
-
-        this.insertFunction = (func) => {
-            functionStack.push(func);
-            return functionStack.length - 1;
-        };
-
-        this.insertBackFunction = (func) => {
-            functionStack.unshift(func);
-        };
-
-        this.removeFunctionByIndex = (index) => {
-            functionStack.splice(index, 1);
-        };
-
-        this.clear = () => functionStack = new Array;
-
-        this.executeNow = () => functionStack.forEach(func => func());
-
+        let block = true;
+        let loop = async () => block? undefined : (this.call(), window.requestAnimationFrame(loop))
         Object.defineProperties(this, {
+            _procedures: {
+                value: new ProcedureStack,
+                writable: false,
+                enumerable: false
+            },
+
             block: {
-                set: value => block = value,
-                get: () => block
+                get: () => block,
+                set: value => ((block && !value)? (block = false, window.requestAnimationFrame(loop)) : block = true, value)
             }
         });
     }
-};
 
+    //Proxy Functions
+    call(){return this._procedures.call()}
+    insert(fx, thisArg){return this._procedures.insert(fx, thisArg)}
+    insertBack(fx, thisArg){return this._procedures.insertBack(fx, thisArg)}
+    remove(fx){return this._procedures.remove(fx)}
+    clear(){return this._procedures.clear()}
+};
+//insert
+//
 
 
 
@@ -171,7 +192,7 @@ customElements.define('com-canvas', class extends HTMLCanvasElement {
         };
 
 
-        this.loop.insertFunction(() => this.rerender());
+        this.loop.insert(() => this.rerender());
         Object.defineProperties(this, {
             children: { get: () => this.ObjectModel },
             innerJSON: {
