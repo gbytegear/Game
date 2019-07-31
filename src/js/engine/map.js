@@ -108,7 +108,6 @@ CanvasObjectModel.defineTemplate('map_object', {
     type: 'rectangle'
 })
 
-
 // TEST
 const empty_map = {
     tiles: {

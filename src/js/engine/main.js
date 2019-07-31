@@ -1,19 +1,21 @@
 const ge = new class GameEngine {
+    loop = canvas.loop.insertBack(new ProcedureStack, this);
+    map = new MapController;
+    player = null;
+    constrols_data = {
+        angle: 0,
+        movement: [0, 0],
+        using: false,
+        attack: false
+    };
     constructor() {
-        this.loop = canvas.loop.insertBack(new ProcedureStack, this);
-        this.map = new MapController;
         this.buildGameSceneStructure();
         this.playerCharacterProcessing();
         // TEST
         this.player.setTextures(data.items.clth_empty);
         this.player.setTextures(data.heads.player);
         this.map.load(data.maps[data.start_map]);
-        this.constrols_data = {
-            angle: 0,
-            movement: [0, 0],
-            using: false,
-            attack: false
-        };
+        // delete this.constructor.prototype;
     }
 
     buildGameSceneStructure () {
@@ -39,6 +41,8 @@ const ge = new class GameEngine {
         });
         this.player.stats.hp = this.player.stats.max_hp;
         delete this.constructor.prototype.playerCharacterProcessing;
+        this.loop.insert(this.controlsProcessing);
+        delete this.constructor.prototype.controlsProcessing;
     }
 
     controlsProcessing(){
@@ -50,7 +54,7 @@ const ge = new class GameEngine {
                 height: 40,
             })
             ?0
-            :add[0]),
+            :this.constrols_data.movement[0]),
     
             this.map.position[1] + (this.map.hitSolid({
                 x: -this.map.position[0] - 20,
@@ -59,7 +63,9 @@ const ge = new class GameEngine {
                 height: 40,
             })
             ?0
-            :add[1])
+            :this.constrols_data.movement[1])
         ];
+
+        ge.player.angle = this.constrols_data.angle;
     }
 }

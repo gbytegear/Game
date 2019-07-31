@@ -1,112 +1,29 @@
-const keys = {
-    up: false,
-    right: false,
-    down: false,
-    left: false,
-    shift: false
-};
+const keys = [];
 
 document.addEventListener('keydown', e => {
-
-    /* TODO: 
-    *
+    if(keys.includes(e.keyCode))return;
     switch(e.keyCode){
-        case 38: case 87: ... break;
+        case 38: case 87: ge.constrols_data.movement[1] += ge.player.stats.movement_speed;break;
+        case 39: case 68: ge.constrols_data.movement[0] -= ge.player.stats.movement_speed;break;
+        case 40: case 83: ge.constrols_data.movement[1] -= ge.player.stats.movement_speed;break;
+        case 37: case 65: ge.constrols_data.movement[0] += ge.player.stats.movement_speed;break;
+        case 27: ;break; //TODO: Open menu
     }
+    keys.push(e.keyCode);
 
-    *
-    var скорость_бега = ?;
-    без шифта делить на 2
-    в андройд по всей величине джостика
-
-    */
-
-    if (e.keyCode === 38 /* up */
-        || e.keyCode === 87 /* w */
-        || e.keyCode === 38)
-        keys.up = true;
-    if (e.keyCode === 39 /* right */
-        || e.keyCode === 68 /* d */
-        || e.keyCode === 39)
-        keys.right = true;
-    if (e.keyCode === 40 /* down */
-        || e.keyCode === 83 /* s */
-        || e.keyCode === 40)
-        keys.down = true;
-    if (e.keyCode === 37 /* left */
-        || e.keyCode === 65 /* a */
-        || e.keyCode === 37)
-        keys.left = true;
-    if (e.keyCode === 16)
-        keys.shift = true;
-
-    // if (e.keyCode === 27) {
-    //     let ui = document.querySelector('.menu');
-    //     window.running = ui.classList.contains('show');
-    //     (ui.classList.contains('show')) ? (ui.classList.remove('show'),
-    //         GameEngine.mainLoop.block = false) : (ui.classList.add('show'),
-    //             GameEngine.mainLoop.block = true);
-    // }
 });
 
 document.addEventListener('keyup', e => {
-    if (e.keyCode === 38 /* up */
-        || e.keyCode === 87 /* w */
-        || e.keyCode === 38)
-        keys.up = false;
-    if (e.keyCode === 39 /* right */
-        || e.keyCode === 68 /* d */
-        || e.keyCode === 39)
-        keys.right = false;
-    if (e.keyCode === 40 /* down */
-        || e.keyCode === 83 /* s */
-        || e.keyCode === 40)
-        keys.down = false;
-    if (e.keyCode === 37 /* left */
-        || e.keyCode === 65 /* a */
-        || e.keyCode === 37)
-        keys.left = false;
-    if (e.keyCode === 16)
-        keys.shift = false;
+    switch(e.keyCode){
+        case 38: case 87: ge.constrols_data.movement[1] -= ge.player.stats.movement_speed;break;
+        case 39: case 68: ge.constrols_data.movement[0] += ge.player.stats.movement_speed;break;
+        case 40: case 83: ge.constrols_data.movement[1] += ge.player.stats.movement_speed;break;
+        case 37: case 65: ge.constrols_data.movement[0] -= ge.player.stats.movement_speed;break;
+        case 27: ;break; //TODO: Open menu
+    }
+    keys.splice(keys.indexOf(e.keyCode), 1);
 });
 
 document.addEventListener('mousemove', e => {
-    ge.player.angle = -(180 / Math.PI * Math.atan2(ge.player.x + ge.player.width / 2 - e.clientX, ge.player.y + ge.player.height / 2 - e.clientY));
-});
-
-// document.addEventListener('mousedown', e => GameEngine.shoot(e.clientX, e.clientY));
-
-// TODO: Перегнать эту хрень в движок!!!
-ge.loop.insert(() => {
-    if(!keys.left && !keys.up && !keys.right && !keys.down)return;
-    let add = [
-        ((keys.left?ge.player.stats.movement_speed:0) - (keys.right?ge.player.stats.movement_speed:0)) * (keys.shift?1.7:1),
-        ((keys.up?ge.player.stats.movement_speed:0) - (keys.down?ge.player.stats.movement_speed:0)) * (keys.shift?1.7:1)
-    ];
-    ge.map.position = [
-        ge.map.position[0] + (ge.map.hitSolid({
-            x: -ge.map.position[0] - add[0] - 20,
-            y: -ge.map.position[1] - 20,
-            width: 40,
-            height: 40,
-        })
-        ?0
-        :add[0]),
-
-        ge.map.position[1] + (ge.map.hitSolid({
-            x: -ge.map.position[0] - 20,
-            y: -ge.map.position[1] - add[1] - 20,
-            width: 40,
-            height: 40,
-        })
-        ?0
-        :add[1])
-    ];
-    let actionStack = ge.map.hitAction({
-        x: -ge.map.position[0] - 20,
-        y: -ge.map.position[1] - 20,
-        width: 40,
-        height: 40,
-    })
-    if(actionStack)actionStack.forEach(action => action(ge.player));
+    ge.constrols_data.angle = -(180 / Math.PI * Math.atan2(ge.player.x + ge.player.width / 2 - e.clientX, ge.player.y + ge.player.height / 2 - e.clientY));
 });

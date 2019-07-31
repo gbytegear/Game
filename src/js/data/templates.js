@@ -47,7 +47,7 @@ CanvasObjectModel.defineTemplate('character', {
             this.stats = {
                 hp: 1000,
                 max_hp: 1000,
-                movement_speed: 10
+                movement_speed: 15
             };
 
             
