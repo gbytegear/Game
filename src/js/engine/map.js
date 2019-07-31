@@ -1,8 +1,10 @@
 "use strict"
 class MapController {
+
+    action_layer = new Array;
+
     constructor() {
         let position = [0, 0];
-        this.action_layer = new Array;
         Object.defineProperties(this, {
             position: {
                 get: () => position,

@@ -89,13 +89,19 @@ class LoopController {
 
 // ---------------------------------------------------------------------------------- Canvas JSON Object Model
 class CanvasObjectModel extends Array {
+
+    canvas = null;
+
+    static typeList = new Object;
+    static templates = new Object;
+
     constructor(canvas) {
         super();
         this.canvas = canvas;
     }
 
     static defineObject(name, prototype) {
-        CanvasObjectModel.prototype.typeList[name] = prototype;
+        CanvasObjectModel.typeList[name] = prototype;
         prototype.type = name;
     }
 
@@ -105,17 +111,17 @@ class CanvasObjectModel extends Array {
     }
 
     static createElement(type, properties = {}) {
-        if (!this.prototype.typeList[type]) return console.error(`Element with name "${type}" isn't exist!`);
-        return new this.prototype.typeList[type](properties);
+        if (!this.typeList[type]) return console.error(`Element with name "${type}" isn't exist!`);
+        return new this.typeList[type](properties);
     }
 
     static defineTemplate(name, json) {
-        this.prototype.templates[name] = json;
+        this.templates[name] = json;
     }
 
     static createElementByTemplate(template) {
-        let element = this.createElement(this.prototype.templates[template].type, this.prototype.templates[template].properties);
-        if (this.prototype.templates[template].childs) this.parse(this.prototype.templates[template].childs, element);
+        let element = this.createElement(this.templates[template].type, this.templates[template].properties);
+        if (this.templates[template].childs) this.parse(this.templates[template].childs, element);
         return element;
     }
 
@@ -151,9 +157,6 @@ class CanvasObjectModel extends Array {
 
 };
 
-CanvasObjectModel.prototype.typeList = new Object;
-CanvasObjectModel.prototype.templates = new Object;
-
 
 
 
@@ -177,18 +180,17 @@ CanvasObjectModel.prototype.templates = new Object;
 
 
 customElements.define('com-canvas', class extends HTMLCanvasElement {
+    context = this.getContext('2d');
+    ObjectModel = new CanvasObjectModel(this);
+    loop = new LoopController;
     constructor() {
         super();
 
-        this.context = this.getContext('2d');
-        this.ObjectModel = new CanvasObjectModel(this);
         this.width = document.body.offsetWidth;
         this.height = document.body.offsetHeight;
-        this.loop = new LoopController;
-        let zoom = 1;
         document.body.onresize = () => {
-            this.width = document.body.offsetWidth / zoom;
-            this.height = document.body.offsetHeight / zoom;
+            this.width = document.body.offsetWidth;
+            this.height = document.body.offsetHeight;
         };
 
 
@@ -203,16 +205,6 @@ customElements.define('com-canvas', class extends HTMLCanvasElement {
                         json.push(child.outerJSON);
                     });
                     return json;
-                }
-            },
-
-            zoom: {
-                get:()=>zoom,
-                set: new_zoom => {
-                    this.style.zoom = new_zoom;
-                    zoom = new_zoom;
-                    this.width = document.body.offsetWidth / zoom;
-                    this.height = document.body.offsetHeight / zoom;
                 }
             }
         });
@@ -277,6 +269,8 @@ customElements.define('com-canvas', class extends HTMLCanvasElement {
 // ---------------------------------------------------------------------------------- COM Item Elements - PROTOTYPE OF ALL COM ELEMENTS
 
 class COMElement {
+    children = new Array;
+    name = '';
     constructor(properties) {
         let index = null, parent = null,
             x = 0, y = 0,
@@ -287,11 +281,6 @@ class COMElement {
             shadowProperties = null,
             renderFunction = () => { },
             insertFunction = () => { };
-        this.children = new Array;
-        this.name = '';
-
-
-
 
 
         // ФУНКЦИИ С ПРЯМЫМ ДОСТУПОМ К СВОЙСТВАМ
@@ -693,31 +682,26 @@ class COMRectangleElement extends COMElement {
 
 // ---------------------------------------------------------------------------------- COM Tiled Map Element
 
-class MultiDimensionRangeArray {
-    constructor() {
-        let ranges = new Array, defaultReturn = null;
+class MultiDimensionRangeArray extends Array {
+    default = null;
+    constructor() {super();}
 
-        this.setDefault = value => defaultReturn = value;
+    clearRanges() {this.length = 0;}
 
-        this.createRange = (rangesArray, value) => {
-            ranges.push({ range: rangesArray, value });
+    setDefault(value){this.default = value;}
+
+    createRange(rangesArray, value){this.push({ range: rangesArray, value });};
+
+    getBy(indexes){
+        for (let i = this.length - 1; i > -1; i--) {
+            let finded = true;
+            this[i].range.forEach((range, i) => {
+                if (range.from > indexes[i] || range.to <= indexes[i]) finded = false;
+            });
+            if (finded) return this[i].value;
         }
-
-        this.getBy = indexes => {
-            for (let i = ranges.length - 1; i > -1; i--) {
-                let finded = true;
-                ranges[i].range.forEach((range, i) => {
-                    if (range.from > indexes[i] || range.to <= indexes[i]) finded = false;
-                });
-                if (finded) return ranges[i].value;
-            }
-            return defaultReturn;
-        }
-
-        this.clearRanges = () => ranges = new Array;
-
-        Object.defineProperty(this, "ranges", { get: () => ranges });
-    }
+        return this.default;
+    };
 }
 
 class COMTiledMapElement extends COMElement {

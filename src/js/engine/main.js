@@ -1,4 +1,5 @@
 const ge = new class GameEngine {
+    
     loop = canvas.loop.insertBack(new ProcedureStack, this);
     map = new MapController;
     player = null;
@@ -8,6 +9,7 @@ const ge = new class GameEngine {
         using: false,
         attack: false
     };
+
     constructor() {
         this.buildGameSceneStructure();
         this.playerCharacterProcessing();
