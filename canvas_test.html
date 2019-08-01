@@ -1,0 +1,29 @@
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=0.5, user-scalable=0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <!-- <link rel="stylesheet" href="./src/css/style.css"> -->
+    <title>Document</title>
+</head>
+
+<body is="main-controller">
+    <canvas is="com-canvas"></canvas>
+    <script src="./src/js/CanvasObjectModel.js"></script>
+    <script>
+        canvas.innerJSON = [
+            {
+                type: 'rectangle',
+                properties: {
+                    size: [300, 300],
+                    name: 'squere',
+                    linear_gradient: {
+                        colors: [
+                            [0, 'black'],
+                            [1, 'transparent']
+                        ]
+                    }
+                }
+            }
+        ];
+    </script>
+</body>

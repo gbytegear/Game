@@ -197,6 +197,7 @@ customElements.define('com-canvas', class extends HTMLCanvasElement {
         this.loop.insert(() => this.rerender());
         Object.defineProperties(this, {
             children: { get: () => this.ObjectModel },
+            ownerCanvas: {get: () => this},
             innerJSON: {
                 set: json => (this.children.splice(0, this.children.length), CanvasObjectModel.parse(json, this)),
                 get: () => {
@@ -272,7 +273,7 @@ class COMElement {
     children = new Array;
     name = '';
     constructor(properties) {
-        let index = null, parent = null,
+        let index = null, parent = null, ownerCanvas = null,
             x = 0, y = 0,
             width = 0, height = 0,
             visible = "true",
@@ -292,6 +293,7 @@ class COMElement {
         this.changeParent = newParent => {
             if (this.parent) this.parent.removeChild(this);
             parent = newParent;
+            ownerCanvas = newParent.ownerCanvas;
             index = null;
 
         }
@@ -401,12 +403,9 @@ class COMElement {
             },
 
             // Technical
-            parent: {
-                get: () => parent
-            },
-            index: {
-                get: () => index
-            },
+            parent: {get: () => parent},
+            ownerCanvas: {get: () => ownerCanvas},
+            index: {get: () => index},
 
             // Transform Origin
             originX: {
@@ -573,7 +572,7 @@ class COMElement {
 
     inserted(parent) {
         this.oninsert.call(this, parent);
-        this.changeParent(parent)
+        this.changeParent(parent);
     }
 
     insert(element) {
@@ -625,7 +624,9 @@ class COMRectangleElement extends COMElement {
         super();
         let color = "transparent",
             src = null,
-            texture = null;
+            texture = null,
+            gradient = null,
+            gradientDescription = null;
 
         Object.defineProperties(this, {
             color: {
@@ -642,7 +643,26 @@ class COMRectangleElement extends COMElement {
                     texture = image;
                 }
             },
-            image: { get: () => texture }
+            image: { get: () => texture },
+            /* TODO */
+            // linear_gradient: {
+            //     get:() => gradient,
+            //     set: newGardient => {
+            //         gradientDescription = newGardient;
+            //         gradientDescription.from = gradientDescription.from || [this.width / 2,0];
+            //         if(typeof(gradientDescription.from) == "string")
+            //         gradientDescription.to = gradientDescription.to || [this.width / 2, this.height];
+
+            //         gradient = document.createElement('canvas').getContext('2d').createLinearGradient(
+            //             gradientDescription.from[0],
+            //             gradientDescription.from[1],
+            //             gradientDescription.to[0],
+            //             gradientDescription.to[1]
+            //         );
+            //         gradientDescription.colors.forEach(color => gradient.addColorStop(color[0], color[1]));
+            //     }
+            // },
+            // gradient:{get:() => gradient}
         })
 
         this.setProperties(properties);
@@ -650,14 +670,19 @@ class COMRectangleElement extends COMElement {
 
     draw(ctx) {
         if (this.width == 0 || this.height == 0) return;
+        ctx.rect(-this.originX, -this.originY, this.width, this.height);
         if (this.color != "transparent") {
-            ctx.rect(-this.originX, -this.originY, this.width, this.height);
             ctx.fillStyle = this.color;
             ctx.fill();
         }
         if (this.image ? this.image.complete : false) {
             ctx.drawImage(this.image, -this.originX, -this.originY, this.width, this.height);
         }
+        /* TODO */
+        // if (this.gradient) {
+        //     ctx.fillStyle = this.gradient;
+        //     ctx.fill();
+        // }
     }
 };
 
