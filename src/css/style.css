@@ -1,6 +1,7 @@
 html, body {
     overflow: hidden !important;
     cursor: crosshair;
+    user-select: none;
 }
 
 body {
@@ -27,8 +28,8 @@ canvas {
 .avatar {
   width: 120px;
   height: 120px;
-  background: center/contain url(../img/avatars/player/standart.png) no-repeat, #2227;
-  border-color: #fff7;
+  background: center/contain url(../img/avatars/player/standart.png) no-repeat, linear-gradient(-45deg, #20203080, #202030ff);
+  border-color: #8080a080;
   border-style: solid;
   border-width: 0;
   border-right-width: 2px;
@@ -43,7 +44,7 @@ canvas {
   left: 122px;
   top: 0;
   background-color: #2227;
-  border-color: #fff7;
+  border-color: #8080a080;
   border-style: solid;
   border-width: 0;
   border-right-width: 2px;
@@ -55,19 +56,107 @@ canvas {
   display: block;
   width: var(--hp);
   height: 20px;
-  background-color: rgba(255, 0, 76, 0.5);
+  background: linear-gradient(to right, #ff002080, #ffa0d080);
 }
 
 .hitbar::after{
   content: "";
   display: block;
-  height: 35px;
+  height: 22px;
   width: 2px;
   position: absolute;
   top: 0;
   left: var(--hp);
   background-color: #fff;
+  box-shadow: 0 0 40px 5px white,
+  0 0 10px 0 white,
+  0 0 5px 0 white;
 }
+
+
+
+
+
+
+
+
+.menu{
+  width: 100vw;
+  height: 100vh;
+  position: fixed;
+  left: 0;
+  top: 0;
+  background: linear-gradient(-45deg, #20203080, #202030ff);
+  visibility: hidden;
+  opacity: 0;
+  transition: opacity 1s;
+}
+
+.menu::before{
+  content: "";
+  display: block;
+  width: calc(100%/* - 20px*/); height: calc(100%/* - 20px*/);
+  position: absolute;
+  /* margin: 10px; */
+  background: linear-gradient(35deg,
+  transparent calc(70% - 20px), #f0f0f010 calc(70% - 19.9px), #f0f0f010 calc(70% - 18px), transparent calc(70% - 17.9px),
+  transparent calc(70% - 10px), #f0f0f008 calc(70% - 9px), #f0f0f008 70%,
+  #f0f0f018 calc(70% + 1px), transparent 90%
+  );
+}
+
+.menu.show{
+  visibility: visible;
+  opacity: 1;
+}
+
+.menu>header{
+  width: 100vw;
+  line-height: 2em;
+  font-size: 2em;
+  display: flex;
+  justify-content: space-around;
+  position: absolute;
+  top: 0;
+  left: 0;
+  border-bottom: 1px solid #8080a080;
+  background: #00001060;
+  /* box-shadow: 0 8px 10px 2px #000010; */
+}
+
+.menu>header>.tab{
+  text-align: center;
+  width: 100%;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  color: #8080a080;
+}
+
+.menu>header>.tab:hover{
+  border-bottom: 2px solid #aaaaffa0;
+  box-shadow: 0 10px 5px -5px #aaaaff40;
+}
+
+.menu>header>.tab:active{
+  background: linear-gradient(to top, #aaaaff20, transparent 50%);
+  color: #aaaaffa0;
+  text-shadow: 0 0 5px #aaaaff;
+}
+
+
+.content{
+  width: calc(100vw - 20px);
+  height: calc(100vh - 4em - 20px);
+  margin: 10px;
+  position: absolute;
+  top: 4em;
+  background: #00001060;
+  box-shadow: 0 8px 10px 2px #000010;
+}
+
+
+
+
+
 
 
 /*MOBILE*/

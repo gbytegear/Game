@@ -36,6 +36,7 @@ const ge = new class GameEngine {
         Object.defineProperty(this.player.stats, 'hp', {
             set: hp => {
                 this.player.stats._hp = hp;
+                if(this.player.stats._hp<0)this.player.stats._hp = 0;
                 (async ()=>document.querySelector('.hitbar').style.setProperty('--hp', (this.player.stats._hp / (this.player.stats.max_hp / 100)) + "%"))();
                 return this.player.stats._hp;
             },

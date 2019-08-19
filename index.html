@@ -9,9 +9,22 @@
 <body is="main-controller">
     <canvas is="com-canvas"></canvas>
     <div class="ui">
-        <div class="avatar"></div>
-        <div class="hitbar"></div>
+        <div class="avatar" title="It's you"></div>
+        <div class="hitbar" title="These are your hitpoints. Take care of them."></div>
+        <div class="menu">
+            <header>
+                <div class="tab">Inventory</div>
+                <div class="tab">Stats</div>
+                <div class="tab">Skills</div>
+                <div class="tab">Quests</div>
+                <div class="tab">Settings</div>
+            </header>
+            <div class="content">
+            </div>
+        </div>
     </div>
+
+
     <!-- Scripts -->
     <script src="./src/js/CanvasObjectModel.js"></script>
     <!-- Data -->
