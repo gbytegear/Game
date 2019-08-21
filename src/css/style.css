@@ -110,7 +110,11 @@ canvas {
   opacity: 1;
 }
 
+
+
+
 .menu>header{
+  --position: 0;
   width: 100vw;
   line-height: 2em;
   font-size: 2em;
@@ -123,6 +127,7 @@ canvas {
   background: #00001060;
   /* box-shadow: 0 8px 10px 2px #000010; */
 }
+
 
 .menu>header>.tab{
   text-align: center;
@@ -153,7 +158,17 @@ canvas {
   box-shadow: 0 8px 10px 2px #000010;
 }
 
-
+.carriage{
+  width: 100px;
+  height: 50px;
+  position: absolute;
+  top: 4em;
+  background: #aaaaff20;
+  clip-path: polygon(0 0, 100% 0, 50% 100%);
+  left: -50px;
+  transition: margin .5s;
+  margin-left: -50px;
+}
 
 
 
