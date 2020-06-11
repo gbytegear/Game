@@ -143,6 +143,17 @@ HTMLDataListElement.prototype.containsValue = function(value){
 const cli = new class CommandLineinterface {
     constructor(){
         Object.defineProperties(this, {
+            loadMap: {
+               value: async function(name) {
+                   let json_map = JSON.parse(localStorage[name])
+                   window.editor.map.load(json_map);
+                   window.editor.map_json = json_map;
+                   document.querySelector("json-editor").load(window.editor.map_json);
+                   },
+               enumerable: true,
+               writable: false
+            },
+
             addObj:{
                 value: async function(to, properties = {}){
                     properties.position = editor.selection.position;
