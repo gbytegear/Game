@@ -1,4 +1,4 @@
-const character_animations = {
+data.character_animations = {
     pistol: [
         {
             body: 0,
