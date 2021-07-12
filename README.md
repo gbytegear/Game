@@ -1,2 +1,2 @@
 # Game
-Game on Cordova/Electron
+Game on HTML5 Canvas, and analogue DOM for Canvas
